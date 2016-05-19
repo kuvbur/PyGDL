@@ -1,0 +1,10 @@
+<productversion>
+  <buildnumber>3003</buildnumber>
+  <codename>Semiramis</codename>
+  <versionstring>15.0.0</versionstring>
+  <shortversionstring>15</shortversionstring>
+  <platform>WIN32</platform>
+  <gslanguage>INT</gslanguage>
+  <gsprodtype>FULL</gsprodtype>
+  <prefspostfix>15.0.0 INT R1</prefspostfix>
+</productversion>
