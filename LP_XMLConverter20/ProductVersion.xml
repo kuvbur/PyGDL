@@ -1,0 +1,10 @@
+<productversion>
+  <buildnumber>3504</buildnumber>
+  <codename>Aalto</codename>
+  <versionstring>20.0.0</versionstring>
+  <shortversionstring>20</shortversionstring>
+  <platform>WIN64</platform>
+  <gslanguage>INT</gslanguage>
+  <gsprodtype>FULL</gsprodtype>
+  <prefspostfix>20.0.0 INT R1</prefspostfix>
+</productversion>

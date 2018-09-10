@@ -1,0 +1,806 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xml:lang="en-US">
+    <head>
+        <title>LP_XMLConverter Documentation</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta http-equiv="Content-Language" content="en-US" />
+        <meta name="Author" content="Táskai Zsolt, GRAPHISOFT" />
+        <link rel="stylesheet" type="text/css" href="StyleLibrary/Style.css" />
+    </head>
+    <body>
+        <div id="docBegin">
+          <p id="graphisoft_title">&nbsp;<span>GRAPHISOFT&reg;</span></p>
+            <p class="hdr"><span class="TitleMain">Basic&nbsp;Library</span>
+              <span class="TitleVersion">Version: 17</span>    </p>
+        </div>
+        <div id="content" class="inset">
+
+        <h1>User Documentation<br/>of the LP_XMLConverter tool</h1>
+
+        <div class="index">
+            <h2>Index</h2>
+            <ol>
+                <li><a href="#abstract">Abstract</a></li>
+                <li>
+                    <a href="#fileformats">File formats of the tool</a>
+                    <ol>
+                        <li><a href="#formats_gsm">Library Part Files</a></li>
+                        <li><a href="#formats_xml">XML Files</a></li>
+                    </ol>
+                </li>
+                <li>
+                    <a href="#parameters">Parameters and running</a>
+                    <ol>
+                        <li><a href="#param_convert">Convert files and directory trees</a></li>
+                        <li><a href="#param_fix">Fix the hierarchy of a library</a></li>
+                        <li><a href="#param_make">Make a full library</a></li>
+                        <li><a href="#param_lcf">Handle LCF files</a></li>
+                        <li><a href="#param_makesubset">Make subset library</a></li>
+                        <li><a href="#param_unicode">Passing Unicode parameter values</a></li>
+                    </ol>
+                </li>
+                <li>
+                    <a href="#usage">Usage tips</a>
+                    <ol>
+                        <li><a href="#for2platforms">Compilation for two platforms</a></li>
+                        <li><a href="#builtin_images">Handling built-in images</a></li>
+                        <li><a href="#hidescripts">Hiding script sections</a></li>
+                        <li><a href="#localization">Localization of default values</a></li>
+                        <li><a href="#listunusedparams">Listing of unused parameters</a></li>
+                    </ol>
+                    </li>
+            </ol>
+        </div>
+
+        <h2 id="abstract">1. Abstract</h2>
+
+        <p>
+            The LP_XMLCoverter tool compiles <abbr title="Extensible Markup Language">XML</abbr> files of a given format to ARCHICAD&reg; Library Parts
+            and vice versa on Windows and Macintosh platforms.
+            Usage of the tool faciliates the creation process of ARCHICAD Libraries
+            by the benefit of a cross-platform text-based format for the time of development.
+        </p>
+
+        <h2 id="fileformats">2. File formats of the tool</h2>
+
+        <p>
+            The tool uses and generates XML and library part files.
+            A library part file can be unequivocally transformed to one XML file
+            and vice versa without losing any data (when using a correct codepage
+            for transcoding, special characters may get lost otherwise).
+        </p>
+        <p>
+            The file names must comply with the codepage set in the Regional
+            Settings of the operating system. For example you won't be able
+            to compile a library with Greek file names on Western Codepage.
+        </p>
+
+        <h3 id="formats_gsm">2.1 Library Part Files</h3>
+        <p>
+            The generated .gsm files are ARCHICAD library part files.
+        </p>
+        <h4>Library Part Identification</h4>
+        <p>
+            In short, two GUIDs - internally coded long numbers -, in combination with the object file name, identify each object.
+            This identifier is called the Library Part ID and it helps ARCHICAD track the iterations of an object, as it is revised or improved.
+            The ID consists of two parts: the first part is the <em>Main ID</em> and the second represents the <em>Revision ID</em>.
+        </p>
+        <p>
+            The Main ID is created when the library part is saved for the first time.
+            It is also modified if a new library part is created based on an other using the "Save as" command.
+        </p>
+        <p>
+            The Revision ID is also created when the library part is saved for the first time
+            but it is modified if the library part is resaved using the "Save" command.
+            Using the LP_XMLConverter tool a compilation will change the Revision ID and leave the Main ID untouched, of course.
+        </p>
+        <p>
+            This means that the Main ID identifies a library part in its function
+            and the Revision ID helps in distinguishing the revisions of the object.
+        </p>
+        <p>
+            For more information refer GDL Technical Standards Chapter 2
+            (part of the <a href="http://www.graphisoft.com/support/developer/documentation/LibraryDevKit/">Basic Library Documenation</a>).
+        </p>
+        <h4>Encoding</h4>
+        <p>
+            The encoding of the texts is UTF-8 from ARCHICAD 11 on.
+        </p>
+
+        <h3 id="formats_xml">2.2 XML Files</h3>
+        <p>
+            The XML files are stored in UTF-8 encoding and the line breaks are UNIX linefeeds.
+            The XML format is defined as <a href="LP_XML.dtd">XML Document Type Definition (DTD)</a> and
+            as <a href="../LP_XML.xsd">XML Schema Definition (XSD)</a> as well.
+        </p>
+        <p>
+            All binary sections of the library part - which are not resolved into XML elements -
+            are saved with Windows byte order.
+        </p>
+        <p>
+            These properties quarantee the full platform independence of the XML format of library parts.
+        </p>
+
+        <h2 id="parameters">3. Parameters and running</h2>
+        <p>
+            Running LP_XMLConverter without parameters will print the version information.
+        </p>
+        <p>
+            You can get a quick overlook on the possible command line arguments by typing <code>LP_XMLConverter help</code>
+            on the command line. The documentation provided herein is more detailed.
+        </p>
+
+        <h3 id="param_convert">3.1 Convert files and directory trees</h3>
+        <pre>LP_XMLConverter libpart2xml [-l lang] [-img folder] [-cur file [-keepimagepath]] [-revids] [-compatibility ACversion] [-password pwd] source dest</pre>
+        <p>
+            Converts the library part file at location <code>source</code> to an XML at location <code>dest</code>.
+        </p>
+        <pre>LP_XMLConverter l2x         [-l lang] [-img folder] [-cur file [-keepimagepath]] [-revids] [-compatibility ACversion] [-password pwd] source dest</pre>
+        <p>
+            Converts all library parts (.gsm files) in the given (<code>source</code>)
+            directory tree to XML files into the given (<code>dest</code>) directory
+            recursively. Other files will be copied as binary files (images, .txt, .gdl, etc.).
+        </p>
+
+        <dl>
+            <dt>-l lang</dt>
+            <dd>
+                Language identifier for text conversion: UTF8, INT, CEU, BAL, CYR, GRE, TUR, ISR, ARA, THA, JPN, TAI, CHI, KOR.
+                The default is the system codepage.
+            </dd>
+            <dt>-img folder</dt>
+            <dd>
+                Location of the image folder to create.
+                The images in each library part will be extracted from the GSM file into subfolders
+                and they will be referred in the <code>path</code> attribute
+                of picture type nodes (InfoPict, Picture, GDLPict) in the created XML files.
+                See chapter <a href="#builtin_images">Handling built-in images</a>.
+            </dd>
+            <dt>-cur file</dt>
+            <dd>
+                Location of the current replacement file. The (binary or XML) file will be read in order to revert the parameter values, which were previously
+                changed by a replacement definition XML, to their original values. See chapter <a href="#localization">Localization of default values</a>.
+            </dd>
+            <dt>-keepimagepath</dt>
+            <dd>
+                Keeps the path and the filename of the images defined in section GDLPict and Picture.
+                If you don't use this specifier, the path will be determined by the path of the library part and the ID of the picture.
+            </dd>
+            <dt>-revids</dt>
+            <dd>
+                Write full UNIDs (main GUID + revision GUID) to the XML files.
+            </dd>
+            <dt>-compatibility ACversion</dt>
+            <dd>
+                Write the XMLs in a format that is understandable by LP_XMLConverter for ARCHICAD ACversion.
+                This is achieved by e.g. leavig out sections, which were introduced since then.
+                ACversion should be between 10 and the current ARCHICAD version, the default is the current.
+            </dd>
+            <dt>-password pwd</dt>
+            <dd>
+                Decrypt the GSMs with the given password. If the password does not match, the GSM will not be converted to XML.
+                The password can be at most 16 characters long.
+            </dd>
+            <dt>source</dt>
+            <dd>
+                In case of <code>libpart2xml</code> the location of the source GSM file. The file must exist.<br />
+                In case of <code>l2x</code> the source directory of the library parts to convert. The directory must exist.
+            </dd>
+            <dt>dest</dt>
+            <dd>
+                In case of <code>libpart2xml</code> the location of the destination XML file. The parent directory must exist.<br />
+                In case of <code>l2x</code> the destination directory for the converted XML files. The parent of the directory must exist.
+            </dd>
+        </dl>
+
+        <pre>LP_XMLConverter xml2libpart [-l lang] [-img folder] [-def file [-cur file [-keepimagepath]]] [-toplatform platform] [-setcopyright Author LicT LicV] [-password pwd] source dest</pre>
+        <p>
+            Converts the XML file at location <code>source</code> to a library part at
+            location <code>dest</code>. If there was a library part at location <code>dest</code>, it is deleted first.
+        </p>
+        <pre>LP_XMLConverter x2l         [-l lang] [-img folder] [-def file [-cur file [-keepimagepath]]] [-toplatform platform] [-setcopyright Author LicT LicV] [-password pwd] source dest</pre>
+        <p>
+            Converts all XML files in the given (<code>source</code>) directory tree to
+            library parts into the given (<code>dest</code>) directory recursively. Other
+            files will be copied as binary files (images, .txt, .gdl, etc.).
+        </p>
+
+        <dl>
+            <dt>-l lang</dt>
+            <dd>
+                Language identifier for text conversion: UTF8, INT, CEU, BAL, CYR, GRE, TUR, ISR, ARA, THA, JPN, TAI, CHI, KOR.
+                The default is the system codepage.
+            </dd>
+            <dt>-img folder</dt>
+            <dd>
+                Location of the image source folder. The images can be referred in the
+                <code>path</code> attribute of picture type nodes (InfoPict, Picture, GDLPict).
+                The compiled library parts will contain the images in themselves.
+                See chapter <a href="#builtin_images">Handling built-in images</a>.
+            </dd>
+            <dt>-def file</dt>
+            <dd>
+                Location of the replacement definition XML file. See chapter <a href="#localization">Localization of default values</a>.
+            </dd>
+            <dt>-cur file</dt>
+            <dd>
+                A location where to create the current replacement file. The file will be written in XML format, if its extension is .xml,
+                and in custom binary format otherwise (which is much faster). See chapter <a href="#localization">Localization of default values</a>.
+            </dd>
+            <dt>-keepimagepath</dt>
+            <dd>
+                Keeps the path and the filename of the images defined in section GDLPict.
+                See chapter <a href="#localization">Localization of default values</a>.
+            </dd>
+            <dt>-toplatform platform</dt>
+            <dd>
+                Defines the target platform. Default is the current.
+                <dl class="condensed">
+                    <dt>WIN</dt>        <dd>Windows</dd>
+                    <dt>MAC_INTEL</dt>  <dd>Macintosh Intel</dd>
+                    <dt>MAC_PPC</dt>    <dd>Macintosh PowerPC</dd>
+                </dl>
+            </dd>
+            <dt>-setcopyright Author LicenseType LicenseVersion</dt>
+            <dd>
+                Sets the Copyright section (Author, License Type and License Version) in every written library part.
+                If the XML contained a Copyright section, in the GSM these fileds will be overridden with the given values.
+                If the XML did not contain a Copyright section, a Copyright section with the given values will be added to the GSM.
+            </dd>
+            <dt>-password pwd</dt>
+            <dd>
+                Encrypt the written GSMs with the given password. Can be at most 16 characters long.
+                Note: LP_XMLConverter will reject encrypting GSMs that will be written with no Copyright section,
+                or with License Type set to "" or "CC0". What Copyright section will be written depends on the source XML and
+                the <code>-setcopyright</code> override option.
+            </dd>
+            <dt>source</dt>
+            <dd>
+                In case of <code>xml2libpart</code> the location of the source XML file. The file must exist.<br />
+                In case of <code>x2l</code> the source directory of the XML files to convert. The directory must exist.
+            </dd>
+            <dt>dest</dt>
+            <dd>
+                In case of <code>xml2libpart</code> the location of the destination GSM file. The parent directory must exist.<br />
+                In case of <code>x2l</code> the destination directory for the converted library part files. The parent of the directory must exist.
+            </dd>
+        </dl>
+
+        <h3 id="param_fix">3.2 Fix the hierarchy of a library</h3>
+        <pre>LP_XMLConverter fixhierarchy libraryLocation [additionalLib ...]</pre>
+        <p>
+            Repairs the ancestry information, the version, the macro-call section and the
+            parameter section of each library part file in the <code>libraryLocation</code>
+            directory tree.
+            Every changed library part gets a new Revision ID.
+        </p>
+        <dl>
+            <dt>libraryLocation</dt>
+            <dd>
+                Location of the (GSM) library to fix.
+            </dd>
+            <dt>additionalLib</dt>
+            <dd>
+                Locations of zero or more additional binary libraries.
+                These libraries are used in fixing the references between library parts
+                (which is based on library part IDs - see GDL Technical Standards Chapter 2.2 for details).
+            </dd>
+        </dl>
+
+        <h3 id="param_make">3.3 Make a full library</h3>
+        <p>
+            These commands are intended to serve in a make system, where libraries are developed.
+            All of them check whether an XML file changed since the last compilation.
+            For this, the IDEntryList.dbe file is used.
+            In this file, the tool stores the ID and the MD5 checksum of all the source files.
+            This data is used for each file as follows:
+        </p>
+        <ul>
+            <li>
+                if the ID of the file is in the list
+                <ul>
+                    <li>
+                        if the stored and the actual checksums match up,<br/>
+                        the file will be skipped (since it is unchanged)</li>
+                    <li>
+                        if the stored and the actual checksums differ,<br/>
+                        the file will be compiled and the checksum and
+                        the ID will be updated in the list</li>
+                </ul>
+            </li>
+            <li>
+                if the ID of the file is NOT in the list<br/>
+                the file will be compiled and its ID and checksum will be added to the list</li>
+        </ul>
+        <p>
+            Non-XML text files (.gdl and .txt) can be stored in Unicode coding,
+            character coding will be transformed to the givel local codepage.
+            Non-XML binary files will be copied unchanged
+            (images and everything except the XML and the foregoing text files).
+        </p>
+
+        <pre>LP_XMLConverter convertlibrary [options] source dest [additionalLib ...]</pre>
+        Compiles a directory tree of XML files to a directory tree of library parts.
+
+        <pre>LP_XMLConverter convchecklibrary [options] source dest [additionalLib ...]</pre>
+        Compiles a directory tree of XML files to a directory tree of library parts and
+        checks the consistency of the whole library (ancestry information and macro-call section).
+
+        <pre>LP_XMLConverter makelibrary [options] source dest [additionalLib ...]</pre>
+        Compiles a directory tree of XML files to a library with a correct hierarchy.
+        So this variant makes a <code>convertlibrary</code> and a <code>fixhierarchy</code> in succession.
+
+        <pre>LP_XMLConverter finalizelibrary [options] source dest [additionalLib ...]</pre>
+        Does <code>makelibrary</code> and updates 4 sections of the the XML files. These sections
+        are: Ancestry, CalledMacros, ParamSection, and optionally Copyright (if <code>-setcopyright</code> is given).
+        These sections change by re-saving the file (because of the GUIDs) and fixing the inconsistencies (done
+        by <code>fixhierarchy</code>).
+
+        <p>
+            The options are: <code>[-l lang] [-s suffix] [-suffix_placeable] [-img folder] [-def file [-cur file [-keepimagepath]]] [-toplatform platform] [-setcopyright Author LicT LicV] [-check level] [-verbose n] [-interface file] [-mastergdl file] [-skip_params file] [-password pwd]</code>
+        </p>
+
+        <dl>
+            <dt>-l lang</dt>
+            <dd>
+                Language identifier for text conversion: UTF8, INT, CEU, BAL, CYR, GRE, TUR, ISR, ARA, THA, JPN, TAI, CHI, KOR.
+                The default is the system codepage.
+            </dd>
+            <dt>-s suffix</dt>
+            <dd>
+                Optional suffix for names of all target folder.
+                It can be used to distinguish library versions (e.g. Basic Library 17).</dd>
+            <dt>-suffix_placeable</dt>
+            <dd>
+                If this switch is present, the suffix will be appended to placeable library parts also.
+            </dd>
+            <dt>-img folder</dt>
+            <dd>
+                Location of the image library. The images can be referred in the
+                <code>path</code> attribute of picture type nodes (InfoPict, Picture, GDLPict).
+                See chapter <a href="#builtin_images">Handling built-in images</a>.
+            </dd>
+            <dt>-def file</dt>
+            <dd>
+                Location of the replacement definition XML file. See chapter <a href="#localization">Localization of default values</a>.
+            </dd>
+            <dt>-cur file</dt>
+            <dd>
+                A location where to create the current replacement file. The file will be written in XML format, if its extension is .xml,
+                and in custom binary format otherwise (which is much faster). See chapter <a href="#localization">Localization of default values</a>.
+            </dd>
+            <dt>-keepimagepath</dt>
+            <dd>
+                Keeps the path and the filename of the images defined in section GDLPict.
+                See chapter <a href="#localization">Localization of default values</a>.
+            </dd>
+            <dt>-toplatform platform</dt>
+            <dd>
+                Defines the target platform. Default is the current.
+                <dl class="condensed">
+                    <dt>WIN</dt>        <dd>Windows</dd>
+                    <dt>MAC_INTEL</dt>  <dd>Macintosh Intel</dd>
+                    <dt>MAC_PPC</dt>    <dd>Macintosh PowerPC</dd>
+                </dl>
+            </dd>
+            <dt>-setcopyright Author LicenseType LicenseVersion</dt>
+            <dd>
+                This argument works differently in the four modes.
+                <dl class="condensed">
+                    <dt><code>convertlibrary</code></dt>
+                    <dd>The parameter is ignored.</dd>
+                    <dt><code>convchecklibrary</code></dt>
+                    <dd>All library parts not in the additional libraries are checked, whether they have the given values (Author, License Type and License Version)
+                        in their Copyright sections.</dd>
+                    <dt><code>makelibrary</code></dt>
+                    <dd>For library parts, which were modified since the last <code>finalizelibrary</code>, and which depend on these,
+                        if they contain a Copyright section, the Copyright section (Author, License Type and License Version) is overridden with the given values.
+                        If they did not contain a Copyright section, a new Copyright section with the given values is added to them.</dd>
+                    <dt><code>finalizelibrary</code></dt>
+                    <dd>In addition to <code>makelibrary</code>, the written Copyright sections are copied back to the XML source files.</dd>
+                </dl>
+                Note: LP_XMLConverter will reject overriding a library part's Copyright section, if the License Type with which to override is "" or "CC0",
+                and the library part is password protected.
+            </dd>
+            <dt>-check level</dt>
+            <dd>
+                Level of checking done during compilation -
+                as level numbers increase tests are accumulative:<br/>
+                <dl class="condensed">
+                    <dt>0</dt><dd>No checking (default)</dd>
+                    <dt>1</dt><dd>Checking GDL Errors</dd>
+                    <dt>2</dt><dd>Checking Pictures</dd>
+                    <dt>3</dt><dd>Checking generic GDL warnings</dd>
+                    <dt>4</dt><dd>Checking .GDL files</dd>
+                    <dt>5</dt><dd>Checking precision warnings</dd>
+                    <dt>6</dt><dd>Checking interpretation errors using the default parameters</dd>
+                    <dt>7</dt><dd>Checking uninitialized variables during interpretation, but stop printing of warnings after the first warning</dd>
+                    <dt>8</dt><dd>Checking uninitialized variables during interpretation, and print all of the warnings</dd>
+                    <dt>9</dt><dd>Checking the unused parameters of a libpart. See chapter <a href="#listunusedparams">Listing of unused parameters</a></dd>
+                </dl>
+            </dd>
+            <dt>-verbose n</dt>
+            <dd>
+                Option for setting the verbosity level of printed messages:<br/>
+                <dl class="condensed">
+                    <dt>0</dt><dd>Quiet mode</dd>
+                    <dt>1</dt><dd>Print compile information (default)</dd>
+                    <dt>2</dt><dd>Print all process information</dd>
+                </dl>
+            </dd>
+            <dt>-interface file</dt>
+            <dd>
+                Macro library interface definition XML file.
+                When compiling a library without the <code>interface</code>
+                parameter specified, the tool will report all unused macros in separate warnings.
+                In case of a macro library unused macros are the natural intention of the creator
+                and these warnings would shroud other important problems.
+                Consequently, macro libraries should specify their public interface
+                in an XML file (and pass the file to the tool) to omit <q>unused macro</q>
+                warnings for the published macros.
+                The format of the XML file is specified in the
+                <a href="LibraryInterface.xsd">XML Schema for Interface Definition</a> file.
+            </dd>
+            <dt>-mastergdl file</dt>
+            <dd>
+                Location of the master GDL file to be used. If not set, the LP_XMLConv.gdl in the application path will be used.
+            </dd>
+            <dt>-skip_params file</dt>
+            <dd>
+                In case of checklevel 9 this exception file defines the parameters not to be listed as unused ones, even if they are unused.
+                See chapter <a href="#listunusedparams">Listing of unused parameters</a>.
+            </dd>
+            <dt>-password pwd</dt>
+            <dd>
+                For every compiled XML encrypt the GSM with the given password. Can be at most 16 characters long.
+                Note: LP_XMLConverter will reject encrypting GSMs for which the source XML does not have a Copyright section,
+                or the License Type is empty or "CC0".
+            </dd>
+            <dt>source</dt>
+            <dd>
+                Source directory of the compilation.
+            </dd>
+            <dt>dest</dt>
+            <dd>
+                Destination directory of the compilation.
+            </dd>
+            <dt>additionalLib</dt>
+            <dd>
+                Locations of zero or more additional binary libraries.
+                These libraries are used in fixing the references between library parts
+                (which is based on library part IDs - see GDL Technical Standards Chapter 2.2 for details).
+            </dd>
+        </dl>
+
+        <h3 id="param_lcf">3.4 Handle LCF files</h3>
+        <p>
+            A library package can be stored in a Library Container File (LCF).
+            LP_XMLConverter can create and extract such an LCF with the following commands.
+        </p>
+
+        <pre>LP_XMLConverter createcontainer lcfFile [-compress level] libraryFolder [...]</pre>
+        <p>
+            Creates an LCF on the location <code>lcfFile</code> containing the passed libraries.
+        </p>
+        <dl>
+            <dt>lcfFile</dt>
+            <dd>
+                Location of the LCF file to create.
+            </dd>
+            <dt>-compress level</dt>
+            <dd>
+                Compression level setting. The level must be in the 0 - 9 range.
+                0 means no compression, 1 is best speed, 9 is best compression. The default is 0.
+            </dd>
+            <dt>libraryFolder</dt>
+            <dd>
+                Location of one or more library folders which are to be included in the LCF file.
+            </dd>
+        </dl>
+
+        <pre>LP_XMLConverter extractcontainer lcfFile libraryFolder</pre>
+        <p>
+            Extracts the LCF at location <code>lcfFile</code> to the <code>libraryFolder</code>
+            folder.
+        </p>
+        <dl>
+            <dt>lcfFile</dt>
+            <dd>
+                Location of the LCF file to exract.
+            </dd>
+            <dt>libraryFolder</dt>
+            <dd>
+                A destination folder, where the contents of the LCF will be extracted.
+            </dd>
+        </dl>
+
+        <h3 id="param_makesubset">3.5 Make subset library</h3>
+        <p>
+            The LP_XMLConverter can create a subset library with the following parametrization.
+            A subset library is the one-sided difference set based on an earlier and a new version of the same library.
+        </p>
+        <p>
+            Let's take AC16Lib and AC17Lib for example.
+            Their subset will contain all library parts from AC16Lib which don't have a compatible equivalent in AC17Lib.
+            These can be:
+        </p>
+        <ol>
+            <li>Elements, which are not supported anymore and got deleted.</li>
+            <li>Elements, which were changed in an incompatible way and got a new Main ID.</li>
+        </ol>
+
+        <pre>LP_XMLConverter makesubsetlibrary previous current subset</pre>
+        <dl>
+            <dt>previous</dt>
+            <dd>
+                Source location of the previous library in XML.
+                The folder must exist.
+            </dd>
+            <dt>current</dt>
+            <dd>
+                Source location of the current library in XML.
+                The folder must exist.
+            </dd>
+            <dt>subset</dt>
+            <dd>
+                Target location of the subset library to be created in XML.
+                The specified folder will be created.
+            </dd>
+        </dl>
+
+        <h3 id="param_unicode">3.6 Passing Unicode parameter values</h3>
+        <p>
+            You can pass non-<abbr title="American Standard Code for Information Interchange">ASCII</abbr> parameters to LP_XMLConverter,
+            e.g. folder or file paths, that contain non-<abbr title="American Standard Code for Information Interchange">ASCII</abbr> characters.
+            You can pass such arguments directly on the command line, or in a parameter file, as described below.
+        </p>
+        <dl>
+            <dt>-f paramFile</dt>
+            <dd>
+            Param_file is an UTF-8 encoded file, which contains one LP_XMLConverter argument in each line, e.g. <code>-img</code>
+            and the location of the image folder should be placed in two separate lines. Empty lines are treated as empty string arguments.
+            Any type of newline character (Windows, Mac, UNIX) is accepted.
+            The arguments in the file will be inserted to the command line replacing the <code>-f paramFile</code>. The parameter file
+            and the direct parametrization can be combined. The <code>-f</code> argument can occur multiple times on the command line.
+            </dd>
+        </dl>
+        <p>
+            LP_XMLConverter can handle only characters which fall into the Basic Multilingual Plane (U+0000 &ndash; U+FFFF)
+            both on the command line, and in the parameter file. The Unicode codespace is divided into 17 planes,
+            and first plane is the Basic Multilingual Plane.
+        </p>
+
+        <h2 id="usage">4. Usage tips</h2>
+
+        <h3 id="for2platforms">4.1 Compilation for two platforms</h3>
+
+        <p>
+            Note, that XML files are cross-platform, GSM files are not.
+            (But ARCHICAD can use GSM files from both platforms)
+        </p>
+        <p>
+            The tool compiles the XML files to a GSM-library for the platform, on whitch it was started.
+            We want to avoid the variance of Revision IDs of the same library part on Windows and on Mac.
+            Different Revision IDs slow down the usage of cross-platform project files a bit.
+            Follow these steps to generate correct libraries with fitting ID-s on both platforms:
+        </p>
+        <ul>
+            <li>compile and finalize the library on a platform (<code>finalizelibrary</code>)</li>
+            <li>copy the - updated - XML files to the other platform</li>
+            <li>
+                compile the library
+                (<code>convertlibrary</code> if no change is made between platforms or
+                <code>finalizelibrary</code> if successive compilation is guaranteed)</li>
+        </ul>
+
+        <h3 id="builtin_images">4.2 Handling built-in images</h3>
+
+        <p>
+            Library parts can contain "built-in" images.
+            LP_XMLConverter eases the access of this feature, too.
+        </p>
+        <p>
+            The steps of usage are the following:
+        </p>
+        <ol>
+            <li>
+                Create a folder for the image files and place images in it.
+                The images can be of any format known by ARCHICAD.
+            </li>
+            <li>
+                Refer the images from the XML files using the following syntax:
+                <pre>
+&lt;GDLPict MIME="image/png"
+    path="subfoldername/filename.png"
+    SubIdent="3"
+    platform="Win"
+    SectVersion="19"
+    SectionFlags="0"&gt;
+&lt;/GDLPict&gt;</pre>
+                The <em>path</em> is relative to the main image folder, which is passed to the converter via the <code>-img</code> commandline parameter.
+                <em>SubIdent</em> is the inner identifier of the image. This ID can be used to access the image from the scripts.
+                In case of using <code>-keepimagepath</code> commandline option, these filenames are invariable after the conversion.
+                Otherwise the filenames become subfoldername/GDLPict_X.ext, where X is the inner identifier of the image ('SubIdent').
+            </li>
+            <li>
+                Use the image in the scripts of the library part containing it.
+                The actual image can be identified by the SubIdent value, as this example shows:
+                <pre>
+UI_INFIELD "parName", xPos, yPos, width, height,
+        1, 3, 5, 1,        ! mind the "3"
+        56, 50, 40, 40,
+        1, "",
+        2, "",
+        3, "",
+        4, "",
+        5, ""</pre>
+            </li>
+        </ol>
+
+        <h3 id="hidescripts">4.3 Hiding script sections</h3>
+
+        <p>
+            Library Parts provide a way to have the scripts hidden from the end user.
+            This can be done in XML by adding 64 to the SectionFlags attribute of the script to be hidden.
+            This will create a GSM file with the given scripts hidden.
+            Converting a library part with hidden scripts back to XML will create empty script elements,
+            so be sure to keep the original XML files after publishing the library.
+        </p>
+
+        <h3 id="localization">4.4 Localization of default values</h3>
+
+        <p>
+            Some published libraries should work with different default attribute sets -
+            consequently they must come with different default parameters to different users.
+            Since ARCHICAD 11, LP_XMLConverter provides a way to compile differently parametrized libraries from the same source XMLs.
+            The technology is based on the concept of <em>meanings</em>.
+        </p>
+        <p>
+            <em>Meanings</em> give you the possibility to assign architectural notion to a given parameter.
+            See the following example from the International ARCHICAD Library's Armchair 01.xml
+            where we assert that the value of 4 in the gs_cont_pen parameter
+            is just an instance of the notion of <em>Furnishing_ContPen</em>
+            (which is meaningful architectural thing in contrast to '4').
+        </p>
+
+        <pre>
+&lt;PenColor Name="gs_cont_pen">
+    &lt;Description>&lt;!&#91;CDATA&#91;&quot;Contour Pen&quot;&#93;&#93;>&lt;/Description>
+    &lt;Fix/>
+    &lt;Flags>
+        &lt;ParFlg_Child/>
+    &lt;/Flags>
+    &lt;Value Meaning="Furnishing_ContPen">4&lt;/Value>
+&lt;/PenColor></pre>
+        <p>
+            Having this asserted, you can define the default values for all <em>meanings</em> you specified.
+            This can be done in the replacement definition XML file,
+            which can be passed to LP_XMLConverter with the <code>-def</code> parameter.
+            Here is a snipplet from it which tells the converter tool to substitute all
+            furnishing contour pens with 7 in the current compliation.
+        </p>
+<pre>
+&lt;ReplacementDef>
+    &lt;ReplacementItem meaning="Furnishing_ContPen" value="7"/>
+    ...
+&lt;/ReplacementDef></pre>
+        <p>
+            Unfortunately, the GSM library part format cannot hold these extra meaning hints,
+            consequently an extra file beside the binary library must be created in this substituting scenario.
+            This extra file is the current replacement file and
+            it is used when you convert the binary GSM-s back to XML - to restore the original values and meanings.
+        </p>
+        <p>
+            The current replacement file can be passed to the converter tool using the <code>-cur</code> parameter.
+        </p>
+        <p>
+            The paths of built-in image files get stored in this file, too,
+            in case you add the <code>-keepimagepath</code> specifier.
+            See chapter <a href="#builtin_images">Handling built-in images</a> for further info.
+        </p>
+
+        <h3 id="listunusedparams">4.5 Listing of unused parameters</h3>
+
+        <p>
+            With checklevel 9, LP_XMLConverter is used to list the unused parameters of a library part file. In general, a parameter is used,
+            when its value is used for something, or a value is assigned to this parameter.
+        </p>
+        <p>
+            Not all of the GDL script files are under the scope of unused parameters check. Only non-template library parts, whom subtype is not Property,
+            can be checked for unused parameters. Other files: .gdl files, template libpart files, and Property library parts are out of scope for
+            the unused parameters check.
+        </p>
+
+        <p>
+            Not all of the unused parameters should be listed as unused. Rules:
+        </p>
+
+        <ul>
+            <li>
+            If the value of a parameter is used, or a value is assigned to a parameter, with or without the 'PARAMETERS' command, the parameter is used.
+            </li>
+            <li>
+            A hidden parameter, which is inherited from a subtype, is not listed as unused.
+            </li>
+            <li>
+            Macros: if a libpart file contains a macro call with 'PARAMETERS ALL', then only those parameters of the libpart can be assumed to be unused, which
+            parameters are not among the called macros' parameters.
+            </li>
+            <li>
+            Separators and titles can never be unused.
+            </li>
+            <li>
+            If a title is from template, and is hidden, then the children parameters of this title are also hidden, and not listed as unused.
+            </li>
+            <li>
+            If the parameter begins with 'AC_' or 'ROOM_' prefix, it won't be listed as unused.
+            </li>
+            <li>
+            If the parameter is listed in the <em>Unused Parameters to Skip</em> XML file, it won't be listed as unused.
+            </li>
+        </ul>
+
+        <p>
+            Format of the <em>Unused Parameters to Skip</em> XML file:
+        </p>
+
+        <pre>
+&lt;?xml version="1.0" encoding="UTF-8"?>
+&lt;UnusedParsToSkip>
+    &lt;Common>
+        &lt;Param>GS_LIST&lt;/Param>
+        &lt;Param>FM_TYPE&lt;/Param>
+    &lt;/Common>
+    &lt;LibPart>
+        &lt;Name>MEP_m_Connections.gsm&lt;/Name>
+        &lt;Param>MEP_VERSION&lt;/Param>
+        &lt;Param>GS_DETLEVEL_3D&lt;/Param>
+    &lt;/LibPart>
+    &lt;LibPart>
+        &lt;MainGUID>0585F813-1620-476A-A6B4-9EAD75FC9F17&lt;/MainGUID>
+         &lt;Param>GS_DRNOEDIT&lt;/Param>
+    &lt;/LibPart>
+&lt;/UnusedParsToSkip>
+        </pre>
+
+        <ul>
+            <li>
+            The 'Common' section affects all library parts under checking.
+            </li>
+            <li>
+            The 'LibPart' section affects only the library part identified by the 'Name' or by the 'MainGUID'.
+            </li>
+        </ul>
+
+         <p>
+            How to get rid of unused parameters:
+        </p>
+
+        <ul>
+            <li>
+            If a parameter is unused, deletion of this is the mostly preferred option. But, with deletion, be very careful:
+            <ul>
+                <li>
+                    Only those parameters can be deleted which are not necessary for ARCHICAD. Other parameters must be written into <em>Unused Parameters to Skip</em> File.
+                </li>
+                <li>
+                    If the libpart is a built-in macro, then parameter deletion is forbidden! Instead of this, the parameter should be assigned to a dummy variable, after a RETURN or an END command.
+                </li>
+                 <li>
+                    If the libpart is a macro, but is not built-in, then, after deletion, the macro file should get  a new Main GUID.
+                </li>
+            </ul>
+            </li>
+            <li>
+            An unused parameter, inherited from the library part's subtype, should be hidden. Or, sometimes, the parameter should be deleted from the subtype itself. NOTE: be careful with deletion as written above!
+            </li>
+        </ul>
+        </div>
+        <div id="footer">
+            <p class="hdr1"><span class="Credits">Copyright &copy; 2012 - GRAPHISOFT SE. All rights reserved worldwide. <br/>
+              </span>
+            </p>
+            <p id="toplink"><a href="#docBegin"><span>Top</span></a></p>
+        </div>
+    </body>
+</html>

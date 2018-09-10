@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+	<xs:annotation>
+		<xs:documentation xml:lang="en">
+			XML-Schema definition of the XML format of the Library Interface file.
+			Created: 2005.12.
+		</xs:documentation>
+	</xs:annotation>
+
+	<!-- ****************** Base types and elements ****************** -->
+
+	<xs:simpleType name="documentName">
+		<xs:annotation>
+			<xs:documentation xml:lang="en">
+				Representation of the document name of library parts.
+				The name is meant without the ".gsm" extension.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="31" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="urlType">
+		<xs:annotation>
+			<xs:documentation xml:lang="en">
+				General purpose URL type.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:anyURI">
+			<xs:minLength value="1"/>
+			<xs:pattern value="([^ ])+" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:element name="Documentation">
+		<xs:annotation>
+			<xs:documentation xml:lang="en">
+				Optional documentation link for a published macro of the interface.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:simpleContent>
+				<xs:extension base="xs:string">
+					<xs:attribute name="url" use="required" type="urlType" />
+					<xs:attribute name="lang" use="required" type="xs:string" />
+				</xs:extension>
+			</xs:simpleContent>
+		</xs:complexType>
+	</xs:element>
+
+	<!-- ****************** Root element definition ****************** -->
+
+	<xs:element name="Interface_Definition">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Published_Macro" maxOccurs="unbounded">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element ref="Documentation" minOccurs="0" />
+						</xs:sequence>
+						<xs:attribute name="name" use="required" type="documentName" />
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+			<xs:attribute name="officialSite" use="optional" type="urlType" />
+		</xs:complexType>
+	</xs:element>
+
+</xs:schema>

@@ -1,0 +1,10 @@
+<productversion>
+  <buildnumber>2708</buildnumber>
+  <codename>Breuer</codename>
+  <versionstring>21.0.0</versionstring>
+  <shortversionstring>21</shortversionstring>
+  <platform>WIN64</platform>
+  <gslanguage>INT</gslanguage>
+  <gsprodtype>FULL</gsprodtype>
+  <prefspostfix>21.0.0 INT R1</prefspostfix>
+</productversion>

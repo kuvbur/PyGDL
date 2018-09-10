@@ -1,0 +1,912 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+	<xs:annotation>
+		<xs:documentation xml:lang="en">
+			XML-Schema definition of the XML format of the GRAPHISOFT Library Parts.
+		</xs:documentation>
+	</xs:annotation>
+
+	<!-- ********** Common element types ****************************************************************************** -->
+
+	<xs:simpleType name="BooleanYesNoTrueFalse">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="yes" />
+			<xs:enumeration value="no" />
+			<xs:enumeration value="true" />
+			<xs:enumeration value="false" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="UNIDtype">
+		<xs:annotation>
+			<xs:documentation xml:lang="en">
+				The preferred format is {XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}-{XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}.
+				The exact format is described in the regular expression. This format is a bit complex but in normal cases the verification won't take too long.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:pattern value="[ \t]*[{(][0-9a-fA-F]{8}([+\-/*.,; ]*[0-9a-fA-F]{4}){2}([+\-/*.,; ]*[0-9a-fA-F]{2}){8}[})]-[{(][0-9a-fA-F]{8}([+\-/*.,; ]*[0-9a-fA-F]{4}){2}([+\-/*.,; ]*[0-9a-fA-F]{2}){8}[})][ \t]*" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="UNIDtypeLoose">
+		<xs:annotation>
+			<xs:documentation xml:lang="en">
+				The preferred format is {XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}-{XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}.
+				This format descriptor doesn't ensure a correct GUID string but it is easy to read and to verify.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:pattern value="[ \t]*\{[0-9a-fA-F\-]*\}-\{[0-9a-fA-F\-]*\}[ \t]*" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="GUIDtype">
+		<xs:annotation>
+			<xs:documentation xml:lang="en">
+				The preferred format is XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX.
+				The exact format is described in the regular expression.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:pattern value="[0-9a-fA-F]{8}([+\-/*.,; ]*[0-9a-fA-F]{4}){2}([+\-/*.,; ]*[0-9a-fA-F]{2}){8}" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="BinaryType">
+		<xs:annotation>
+			<xs:documentation xml:lang="en">
+				This type collects the permitted characters in a binary section, but is will slow down the verification of the XML if you start using it.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:pattern value="[0-9a-fA-F \t\r\n]*" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Platform">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Mac" />
+			<xs:enumeration value="Mactel" />
+			<xs:enumeration value="Win" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="MigrationEnum">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Normal" />
+			<xs:enumeration value="IncompatiblyChanged" />
+			<xs:enumeration value="Obsolete" />
+      <xs:enumeration value="TemporaryMigrationObject" />
+    </xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="NonEmptyString">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="1" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:complexType name="RGBColor">
+		<xs:annotation>
+			<xs:documentation xml:lang="en">
+				RGB Color in binary 2D representation
+			</xs:documentation>
+		</xs:annotation>
+		<xs:attribute name="red" type="xs:unsignedLong" use="required" />
+		<xs:attribute name="green" type="xs:unsignedLong" use="required" />
+		<xs:attribute name="blue" type="xs:unsignedLong" use="required" />
+	</xs:complexType>
+
+	<xs:attributeGroup name="SectionBaseAttrs">
+		<xs:attribute name="SubIdent" type="xs:unsignedShort" use="required" />
+		<xs:attribute name="SectVersion" type="xs:short" use="required" />
+		<xs:attribute name="SectionFlags" type="xs:byte" use="required" />
+	</xs:attributeGroup>
+	<xs:attributeGroup name="SectionBinaryAttrs">
+		<xs:attribute name="length_in_bytes" type="xs:long" use="required" />
+		<xs:attribute name="platform" type="Platform" use="required"/>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="SectionPicAttrs">
+		<xs:attribute name="path" type="xs:string" use="optional" />
+		<xs:attribute name="length_in_bytes" type="xs:long" use="optional" />
+		<xs:attribute name="platform" type="Platform" use="optional"/>
+	</xs:attributeGroup>
+
+	<xs:complexType name="StringSectionType">
+		<xs:simpleContent>
+			<xs:extension base="xs:string">
+				<xs:attributeGroup ref="SectionBaseAttrs" />
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:complexType name="BinarySection">
+		<xs:annotation>
+			<xs:documentation xml:lang="en">
+				Our binary representation allows hexadecimal and whitespace characters.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:simpleContent>
+			<xs:extension base="xs:string">		<!-- you can use BinaryType, but it will slow down the verification a bit -->
+				<xs:attributeGroup ref="SectionBaseAttrs" />
+				<xs:attributeGroup ref="SectionBinaryAttrs" />
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:complexType name="PictureSection">
+		<xs:annotation>
+			<xs:documentation xml:lang="en">
+				A picture element can contain raw binary picture data
+				or a path to a picture file.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:simpleContent>
+			<xs:extension base="xs:string">		<!-- you can use BinaryType, but it will slow down the verification a bit -->
+				<xs:attributeGroup ref="SectionBaseAttrs" />
+				<xs:attributeGroup ref="SectionPicAttrs" />
+				<xs:attribute name="MIME" type="xs:string" use="required" />
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:complexType name="empty" />
+
+
+	<!-- ********** Drawing elements - common descriptors ************************************************************* -->
+
+	<xs:simpleType name="DrawingElemName">
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="32" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="OrderingType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Natural" />
+			<xs:enumeration value="DrawQueue" />
+			<xs:enumeration value="SortQueue" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:element name="Ang" type="xs:double" />
+	<xs:element name="Layer" type="xs:short" />
+	<xs:element name="DrawIndex" type="xs:byte" />
+	<xs:element name="Pattern" type="xs:short" />
+	<xs:element name="Pen" type="xs:short" />
+	<xs:element name="X" type="xs:double" />
+	<xs:element name="Y" type="xs:double" />
+	<xs:element name="BegX" type="xs:double" />
+	<xs:element name="BegY" type="xs:double" />
+	<xs:element name="EndX" type="xs:double" />
+	<xs:element name="EndY" type="xs:double" />
+	<xs:element name="IsContour" type="BooleanYesNoTrueFalse" />
+	<xs:element name="Size" type="xs:double" />
+	<xs:element name="Spac" type="xs:double" />
+	<xs:element name="StyleInd" type="xs:long" />
+	<xs:element name="LocX" type="xs:double" />
+	<xs:element name="LocY" type="xs:double" />
+	<xs:element name="Width" type="xs:double" />
+	<xs:element name="Ind1" type="xs:short" />
+	<xs:element name="Ind2" type="xs:short" />
+	<xs:element name="ParamInd" type="xs:unsignedByte" />
+	<xs:element name="L" type="xs:string">
+		<xs:annotation>
+			<xs:documentation xml:lang="en">
+				Represents the last line of the text (without new line sequence at the end).
+			</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+
+
+	<!-- ********** Parameter types - common descriptors ************************************************************** -->
+
+	<xs:simpleType name="ParamName">
+		<xs:annotation>
+			<xs:documentation xml:lang="en">
+				This type collects the permitted characters in a GDL identifier. In the XML file you can place whitespace characters before and after the name.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="31" />
+			<xs:pattern value="[a-zA-Z_~][a-zA-Z_~0-9]*" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:element name="Description" type="xs:string" />
+	<xs:element name="Fix" type="empty" />
+	<xs:element name="Flags">
+		<xs:annotation>
+			<xs:documentation xml:lang="en">The flags which are set in the mask are present in the XML representation.</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:element name="ParFlg_Child" type="empty" />
+				<xs:element name="ParFlg_BoldName" type="empty" />
+				<xs:element name="ParFlg_Fixed" type="empty" />
+				<xs:element name="ParFlg_Unique" type="empty" />
+				<xs:element name="ParFlg_SHidden" type="empty" />
+				<xs:element name="ParFlg_Open" type="empty" />
+				<xs:element name="ParFlg_Disabled" type="empty" />
+				<xs:element name="ParFlg_Hidden" type="empty" />
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Value">
+		<xs:complexType>
+			<xs:simpleContent>
+				<xs:extension base="xs:string">
+					<xs:attribute name="Meaning" type="NonEmptyString" use="optional" />
+				</xs:extension>
+			</xs:simpleContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ArrayValues">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="AVal" maxOccurs="unbounded">
+					<xs:complexType>
+						<xs:simpleContent>
+							<xs:extension base="xs:string">
+								<xs:attribute name="Row" type="xs:long" use="required" />
+								<xs:attribute name="Column" type="xs:long" />
+								<xs:attribute name="Meaning" type="NonEmptyString" use="optional" />
+							</xs:extension>
+						</xs:simpleContent>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+			<xs:attribute name="FirstDimension" use="required" type="xs:long" />
+			<xs:attribute name="SecondDimension" use="required" type="xs:long" />
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="ParameterTypeWithValue">
+		<xs:sequence>
+			<xs:element ref="Description" />
+			<xs:element ref="Fix" minOccurs="0" />
+			<xs:element ref="Flags" minOccurs="0" maxOccurs="1" />
+			<xs:choice minOccurs="1" maxOccurs="1">
+				<xs:element ref="Value" />
+				<xs:element ref="ArrayValues" />
+			</xs:choice>
+		</xs:sequence>
+		<xs:attribute name="Name" use="required" type="ParamName" />
+	</xs:complexType>
+	<xs:complexType name="ParameterTypeWithoutValue">
+		<xs:sequence>
+			<xs:element ref="Description" />
+			<xs:element ref="Fix" minOccurs="0" />
+			<xs:element ref="Flags" minOccurs="0" maxOccurs="1" />
+		</xs:sequence>
+		<xs:attribute name="Name" use="required" type="ParamName" />
+	</xs:complexType>
+
+	<xs:simpleType name="FrameExpressionType">
+		<xs:annotation>
+			<xs:documentation xml:lang="en">
+				This type only restricts the string length of a frame expression.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="512" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:complexType name="LicenseTypeAndVersion">
+		<xs:sequence>
+			<xs:element name="Type" type="xs:string" />
+			<xs:element name="Version" type="xs:string" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<!-- ********** the GDL sections in the file *********************************************************************** -->
+
+	<xs:element name="Symbol">
+		<xs:complexType>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+
+				<!-- ********** ParamSection section ********** -->
+				<xs:element name="ParamSection">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="ParamSectHeader">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="Version" type="xs:unsignedByte" />
+										<xs:element name="AutoHotspots" type="BooleanYesNoTrueFalse" />
+										<xs:element name="HoleBits" minOccurs="0" maxOccurs="1">
+											<xs:annotation>
+												<xs:documentation xml:lang="en">
+													The flags which are set in the mask are present in the XML representation.
+												</xs:documentation>
+											</xs:annotation>
+											<xs:complexType>
+												<xs:choice minOccurs="0" maxOccurs="unbounded">
+													<xs:element name="WDBit_3DFrame" type="empty" />
+													<xs:element name="WDBit_2DSideFr" type="empty" />
+													<xs:element name="WDBit_2DLengFr" type="empty" />
+													<xs:element name="WDBit_OrientCustom" type="empty" />
+													<xs:element name="WDBit_OrientReverse" type="empty" />
+													<xs:element name="WDBit_ThickIsParam" type="empty" />
+													<xs:element name="WDBit_LFramIsParam" type="empty" />
+													<xs:element name="WDBit_RFramIsParam" type="empty" />
+													<xs:element name="WDBit_TFramIsParam" type="empty" />
+													<xs:element name="WDBit_BFramIsParam" type="empty" />
+													<xs:element name="WDBit_InsetIsParam" type="empty" />
+												</xs:choice>
+											</xs:complexType>
+										</xs:element>
+										<xs:element name="StatBits" minOccurs="0" maxOccurs="1">
+											<xs:annotation>
+												<xs:documentation xml:lang="en">
+													The flags which are set in the mask are present in the XML representation.
+												</xs:documentation>
+											</xs:annotation>
+											<xs:complexType>
+												<xs:choice minOccurs="0" maxOccurs="unbounded">
+													<xs:element name="STBit_UIDefault" type="empty" />
+													<xs:element name="STBit_FixSize" type="empty" />
+													<xs:element name="STBit_SizeTo2D" type="empty" />
+                          <xs:element name="STBit_OneRunVLScript" type="empty" />
+                          <xs:element name="STBit_UIUseHierarchicalPages" type="empty" />
+                        </xs:choice>
+											</xs:complexType>
+										</xs:element>
+										<xs:element name="WDLeftFrame" type="xs:double" />
+										<xs:element name="WDRightFrame" type="xs:double" />
+										<xs:element name="WDTopFrame" type="xs:double" />
+										<xs:element name="WDBotFrame" type="xs:double" />
+										<xs:element name="LayFlags" type="xs:long" />
+										<xs:element name="WDMirrorThickness" type="xs:double" />
+										<xs:element name="NumberOfParameters" type="xs:unsignedShort" minOccurs="0" />		<!-- not used by LP_XMLConverter -->
+										<xs:element name="WDWallInset" type="xs:double" />
+										<xs:element name="SymbolColor" type="xs:long" />
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="Parameters">
+								<xs:complexType>
+									<xs:choice minOccurs="0" maxOccurs="unbounded">									<!-- should be maxOccurs="1024", but it would be very slow with Xerces-C++ 3.0.1 -->
+										<xs:element name="Length" type="ParameterTypeWithValue" />
+										<xs:element name="Boolean" type="ParameterTypeWithValue" />
+										<xs:element name="Integer" type="ParameterTypeWithValue" />
+										<xs:element name="Title" type="ParameterTypeWithoutValue" />
+										<xs:element name="Separator" type="ParameterTypeWithoutValue" />
+										<xs:element name="String" type="ParameterTypeWithValue" />
+										<xs:element name="Angle" type="ParameterTypeWithValue" />
+										<xs:element name="FillPattern" type="ParameterTypeWithValue" />
+										<xs:element name="LineType" type="ParameterTypeWithValue" />
+										<xs:element name="Material" type="ParameterTypeWithValue" />
+										<xs:element name="PenColor" type="ParameterTypeWithValue" />
+										<xs:element name="RealNum" type="ParameterTypeWithValue" />
+										<xs:element name="ColorRGB" type="ParameterTypeWithValue" />
+										<xs:element name="Intensity" type="ParameterTypeWithValue" />
+										<xs:element name="LightSwitch" type="ParameterTypeWithValue" />
+									</xs:choice>
+									<xs:attribute name="number" type="xs:unsignedShort" use="optional" />			<!-- not used by LP_XMLConverter -->
+									<xs:attribute name="fix_vars" type="xs:unsignedShort" use="optional" />		<!-- not used by LP_XMLConverter -->
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="WDFrameExpression" minOccurs="0" maxOccurs="1">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="F" type="FrameExpressionType" minOccurs="6" maxOccurs="6" />
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="WDOrientation" minOccurs="0" maxOccurs="1">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="Def" type="xs:string" />
+										<xs:element name="Mirr" type="xs:string" />
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+						<xs:attributeGroup ref="SectionBaseAttrs" />
+					</xs:complexType>
+				</xs:element>
+
+				<xs:element name="Script_1D" type="StringSectionType" />
+
+				<xs:element name="Script_2D" type="StringSectionType" />
+
+				<xs:element name="Script_3D" type="StringSectionType" />
+
+				<xs:element name="Script_PR" type="StringSectionType" />
+
+				<xs:element name="Script_UI" type="StringSectionType" />
+
+				<xs:element name="Script_VL" type="StringSectionType" />
+
+				<xs:element name="Script_FWM" type="StringSectionType" />
+
+				<xs:element name="Script_BWM" type="StringSectionType" />
+
+				<xs:element name="Comment" type="StringSectionType" />
+
+				<xs:element name="Keywords" type="StringSectionType" />
+
+				<!-- ********** Drawing section ********** -->
+				<xs:element name="Drawing">
+					<xs:complexType>
+						<xs:choice minOccurs="0" maxOccurs="unbounded">
+							<xs:element name="Font">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="FamilyType" type="xs:short" />
+										<xs:element name="FontName" type="DrawingElemName" />
+										<xs:element ref="StyleInd" />
+										<xs:element name="Face" type="xs:unsignedByte" />
+										<xs:element name="Centre" type="xs:byte" />
+										<xs:element name="Justification" type="xs:short" />
+										<xs:element name="Slant" type="xs:double" />
+										<xs:element ref="Size" />
+										<xs:element ref="Spac" />
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="PixMap">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element ref="DrawIndex" />
+										<xs:element ref="Layer" />
+										<xs:element name="Mirrored" type="BooleanYesNoTrueFalse" />
+										<xs:element name="AnchorPoint" type="xs:byte" />
+										<xs:element name="ColorDepth" type="xs:short" />
+										<xs:element name="PixelSizeX" type="xs:short" />
+										<xs:element name="PixelSizeY" type="xs:short" />
+										<xs:element name="PixMapFormat" type="xs:unsignedLong" />
+										<xs:element name="DestXMin" type="xs:double" />
+										<xs:element name="DestYMin" type="xs:double" />
+										<xs:element name="DestXMax" type="xs:double" />
+										<xs:element name="DestYMax" type="xs:double" />
+										<xs:element name="OrigXMin" type="xs:double" />
+										<xs:element name="OrigYMin" type="xs:double" />
+										<xs:element name="OrigXMax" type="xs:double" />
+										<xs:element name="OrigYMax" type="xs:double" />
+										<xs:element name="PixName" type="DrawingElemName" />
+										<xs:element name="RotAngle" type="xs:double" />
+										<xs:element name="PixBinLen" type="xs:long" />
+										<xs:element name="PixBin" type="xs:string" /><!-- or BinaryType -->
+										<xs:element name="Transparent" type="BooleanYesNoTrueFalse" />
+										<xs:element name="MimeType" type="xs:string" />
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="Hatch">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element ref="DrawIndex" />
+										<xs:element name="FillPen" type="xs:short" />
+										<xs:element ref="Layer" />
+										<xs:element name="FillPat" type="xs:short" />
+										<xs:element name="ContPen" type="xs:short" />
+										<xs:element name="ContVis" type="BooleanYesNoTrueFalse" minOccurs="0" />
+										<xs:element name="ContLType" type="xs:short" />
+										<xs:element name="FillBkgPen" type="xs:short" />
+										<xs:choice minOccurs="1" maxOccurs="1">
+											<xs:sequence>
+												<xs:element name="Global" type="BooleanYesNoTrueFalse" />
+												<xs:element name="OffsetX" type="xs:double" />
+												<xs:element name="OffsetY" type="xs:double" />
+												<xs:element name="Distorted" type="BooleanYesNoTrueFalse" />
+												<xs:element name="Matrix00" type="xs:double" />
+												<xs:element name="Matrix10" type="xs:double" />
+												<xs:element name="Matrix01" type="xs:double" />
+												<xs:element name="Matrix11" type="xs:double" />
+												<xs:element name="BackgroundRGB" type="RGBColor" minOccurs="0" />
+												<xs:element name="ForegroundRGB" type="RGBColor" minOccurs="0" />
+												<xs:element name="GradientInnerRadius" type="xs:double" />
+											</xs:sequence>
+											<xs:sequence>
+												<xs:element name="BackgroundRGB" type="RGBColor" minOccurs="0" />
+												<xs:element name="ForegroundRGB" type="RGBColor" minOccurs="0" />
+												<xs:element name="Transformation">
+													<xs:complexType>
+														<xs:sequence>
+															<xs:element name="Type" type="xs:unsignedShort" />
+															<xs:element name="Version" type="xs:unsignedShort" />
+															<xs:element name="Flags" type="xs:int" />
+															<xs:element name="OffsetX" type="xs:double" />
+															<xs:element name="OffsetY" type="xs:double" />
+															<xs:element name="Matrix00" type="xs:double" />
+															<xs:element name="Matrix10" type="xs:double" />
+															<xs:element name="Matrix01" type="xs:double" />
+															<xs:element name="Matrix11" type="xs:double" />
+															<xs:element name="InnerRadius" type="xs:double" />
+														</xs:sequence>
+													</xs:complexType>
+												</xs:element>
+											</xs:sequence>
+										</xs:choice>
+										<xs:element name="Polygons">
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element name="Contour" minOccurs="1" maxOccurs="unbounded">
+														<xs:complexType>
+															<xs:sequence>
+																<xs:element name="V" minOccurs="2" maxOccurs="unbounded">
+																	<xs:complexType>
+																		<xs:sequence>
+																			<xs:element ref="X" />
+																			<xs:element ref="Y" />
+																			<xs:element name="ArcAngle" minOccurs="0" type="xs:double" />
+																		</xs:sequence>
+																	</xs:complexType>
+																</xs:element>
+															</xs:sequence>
+														</xs:complexType>
+													</xs:element>
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="Line">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element ref="DrawIndex" />
+										<xs:element ref="Pen" />
+										<xs:element ref="Layer" />
+										<xs:element ref="Pattern" />
+										<xs:element name="InIndex" type="xs:long" />
+										<xs:element ref="BegX" />
+										<xs:element ref="BegY" />
+										<xs:element ref="EndX" />
+										<xs:element ref="EndY" />
+										<xs:element ref="IsContour" />
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="Hotspot">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element ref="DrawIndex" />
+										<xs:element ref="Pen" />
+										<xs:element ref="Layer" />
+										<xs:element name="HotspotType" type="xs:short" />
+										<xs:element name="HSSubtype" type="xs:short" />
+										<xs:element name="SuppUnId" type="xs:long" />
+										<xs:element name="CoordX" type="xs:double" />
+										<xs:element name="CoordY" type="xs:double" />
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="Arc">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element ref="DrawIndex" />
+										<xs:element ref="Pen" />
+										<xs:element ref="Layer" />
+										<xs:element ref="Pattern" />
+										<xs:element name="Whole" type="BooleanYesNoTrueFalse" />
+										<xs:element name="Elliptic" type="BooleanYesNoTrueFalse" />
+										<xs:element name="Reflected" type="BooleanYesNoTrueFalse" />
+										<xs:element name="origX" type="xs:double" />
+										<xs:element name="origY" type="xs:double" />
+										<xs:element name="Radius" type="xs:double" />
+										<xs:element ref="Ang" />
+										<xs:element name="Ratio" type="xs:double" />
+										<xs:element name="BegAng" type="xs:double" />
+										<xs:element name="EndAng" type="xs:double" />
+										<xs:element ref="BegX" />
+										<xs:element ref="BegY" />
+										<xs:element ref="EndX" />
+										<xs:element ref="EndY" />
+										<xs:element ref="IsContour" />
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="Spline">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element ref="DrawIndex" />
+										<xs:element ref="Pen" />
+										<xs:element ref="Layer" />
+										<xs:element ref="Pattern" />
+										<xs:element name="AutoSm" type="BooleanYesNoTrueFalse" />
+										<xs:element name="Closed" type="BooleanYesNoTrueFalse" />
+										<xs:element ref="IsContour" />
+										<xs:element name="SplinePoints">
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element name="P" maxOccurs="unbounded">
+														<xs:complexType>
+															<xs:sequence>
+																<xs:element ref="X" />
+																<xs:element ref="Y" />
+																<xs:element name="LenPrev" type="xs:double">
+																	<xs:annotation>
+																		<xs:documentation xml:lang="en">
+																			In the first point use 0.
+																		</xs:documentation>
+																	</xs:annotation>
+																</xs:element>
+																<xs:element name="LenNext" type="xs:double">
+																	<xs:annotation>
+																		<xs:documentation xml:lang="en">
+																			In the last point use 0.
+																		</xs:documentation>
+																	</xs:annotation>
+																</xs:element>
+																<xs:element name="DirAng" type="xs:double">
+																	<xs:annotation>
+																		<xs:documentation xml:lang="en">
+																			In both ending points use 0.
+																		</xs:documentation>
+																	</xs:annotation>
+																</xs:element>
+															</xs:sequence>
+														</xs:complexType>
+													</xs:element>
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="Text">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element ref="DrawIndex" />
+										<xs:element ref="Pen" />
+										<xs:element ref="Layer" />
+										<xs:element name="NonBreaking" type="xs:boolean" />
+										<xs:element ref="ParamInd" />
+										<xs:element ref="StyleInd" />
+										<xs:element ref="LocX" />
+										<xs:element ref="LocY" />
+										<xs:element ref="Ang" />
+										<xs:element ref="Width" />
+										<xs:element name="Height" type="xs:double" />
+										<xs:element ref="Size" />
+										<xs:element ref="Spac" />
+										<xs:element ref="Ind1" />
+										<xs:element ref="Ind2" />
+										<xs:element name="TLines">
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element name="L_RET" type="xs:string" minOccurs="0" maxOccurs="unbounded">
+														<xs:annotation>
+															<xs:documentation xml:lang="en">
+																Represents a line of the text ended by a new line sequence.
+															</xs:documentation>
+														</xs:annotation>
+													</xs:element>
+													<xs:element ref="L" minOccurs="0" maxOccurs="unbounded" />
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="RichText">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element ref="DrawIndex" />
+										<xs:element ref="Layer" />
+										<xs:element ref="LocX" />
+										<xs:element ref="LocY" />
+										<xs:element ref="Width" minOccurs="0" />
+										<xs:element ref="Ang" />
+										<xs:element name="WidthFactor" type="xs:double" />
+										<xs:element name="CharSpaceFactor" type="xs:double" />
+										<xs:element name="Anchor" type="xs:short" />
+										<xs:element name="FixedHeight" type="BooleanYesNoTrueFalse" />
+										<xs:element name="NonBreaking" type="BooleanYesNoTrueFalse" />
+										<xs:element ref="ParamInd" />
+										<xs:element ref="Ind1" />
+										<xs:element ref="Ind2" />
+										<xs:element name="Content">
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element name="Paragraph" minOccurs="0" maxOccurs="unbounded">
+														<xs:complexType>
+															<xs:sequence>
+																<xs:element name="Alignment" type="xs:short" />
+																<xs:element name="FirstLineIndent" type="xs:double" />
+																<xs:element name="LeftIndent" type="xs:double" />
+																<xs:element name="RightIndent" type="xs:double" />
+																<xs:element name="LineSpacing" type="xs:double" />
+																<xs:element name="TextStyles">
+																	<xs:complexType>
+																		<xs:sequence>
+																			<xs:element name="TStyle" minOccurs="1" maxOccurs="unbounded">
+																				<xs:complexType>
+																					<xs:sequence>
+																						<xs:element ref="Size" />
+																						<xs:element ref="StyleInd" />
+																						<xs:element name="PenInd" type="xs:short" />
+																						<xs:element ref="L" minOccurs="1" maxOccurs="unbounded" />
+																					</xs:sequence>
+																				</xs:complexType>
+																			</xs:element>
+																		</xs:sequence>
+																	</xs:complexType>
+																</xs:element>
+																<xs:element name="Tabulators">
+																	<xs:complexType>
+																		<xs:sequence>
+																			<xs:element name="Tab" minOccurs="0" maxOccurs="unbounded">
+																				<xs:complexType>
+																					<xs:sequence>
+																						<xs:element name="Position" type="xs:double" />
+																						<xs:element name="Type" type="xs:short" />
+																					</xs:sequence>
+																				</xs:complexType>
+																			</xs:element>
+																		</xs:sequence>
+																	</xs:complexType>
+																</xs:element>
+															</xs:sequence>
+														</xs:complexType>
+													</xs:element>
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+						</xs:choice>
+						<xs:attributeGroup ref="SectionBaseAttrs" />
+						<xs:attribute name="Ordering" type="OrderingType" use="required"/>
+					</xs:complexType>
+				</xs:element>
+
+				<!-- ********** Binary3D section ********** -->
+				<xs:element name="Binary3D" type="BinarySection" />
+
+				<!-- ********** InfoPict section ********** -->
+				<xs:element name="InfoPict" type="PictureSection" />
+
+				<!-- ********** Picture section ********** -->
+				<xs:element name="Picture" type="PictureSection" />
+
+				<!-- ********** GDLPict section ********** -->
+				<xs:element name="GDLPict" type="PictureSection" />
+
+				<!-- ********** SubKind section ********** -->
+				<xs:element name="SubKind" type="BinarySection" />
+
+				<!-- ********** MigrationTable section ********** -->
+				<xs:element name="MigrationTable">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="MigrationTableElement" minOccurs="0" maxOccurs="unbounded">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="MainGUID" type="GUIDtype" />
+										<xs:element name="Version" type="xs:unsignedLong" />
+                    <xs:element name="Name" type="xs:string" minOccurs="0" maxOccurs="1" />
+                    <xs:element name="AutoMigration" type="BooleanYesNoTrueFalse" minOccurs="0" maxOccurs="1" />
+                  </xs:sequence>
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+						<xs:attributeGroup ref="SectionBaseAttrs" />
+					</xs:complexType>
+				</xs:element>
+
+				<!-- ********** CalledMacros section ********** -->
+				<xs:element name="CalledMacros">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="Macro" minOccurs="0" maxOccurs="unbounded">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="MName" type="xs:string" />
+										<xs:choice>
+											<xs:element name="UNID" type="UNIDtype" />
+											<xs:element name="MainGUID" type="GUIDtype" />
+										</xs:choice>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+						<xs:attributeGroup ref="SectionBaseAttrs" />
+					</xs:complexType>
+				</xs:element>
+
+				<!-- ********** Ancestry section ********** -->
+				<xs:element name="Ancestry">
+					<xs:complexType>
+						<xs:choice minOccurs="0" maxOccurs="unbounded">
+							<xs:element name="UNID" type="UNIDtype" />
+							<xs:element name="MainGUID" type="GUIDtype" />
+						</xs:choice>
+						<xs:attributeGroup ref="SectionBaseAttrs" />
+						<xs:attribute name="Template" type="BooleanYesNoTrueFalse" use="required" />
+					</xs:complexType>
+				</xs:element>
+
+				<!-- ********** CompDef section ********** -->
+				<xs:element name="CompDef">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="CompRec" maxOccurs="unbounded">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="Code" type="xs:string" />
+										<xs:element name="Name" type="xs:string" />
+										<xs:element name="Quantity" type="xs:double" />
+										<xs:element name="Measure" type="xs:string" />
+										<xs:element name="Keycode" type="xs:string" />
+										<xs:element name="Unitcode" type="xs:string" />
+										<xs:element name="DBSetname" type="xs:string" />
+										<xs:element name="Prop_with" type="xs:string" />
+										<xs:element name="Reference" type="BooleanYesNoTrueFalse" />
+										<xs:element name="Prop_expr" type="xs:string" />
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+						<xs:attributeGroup ref="SectionBaseAttrs" />
+						<xs:attribute name="NumComps" type="xs:int" use="required" />
+					</xs:complexType>
+				</xs:element>
+
+				<!-- ********** DescDef section ********** -->
+				<xs:element name="DescDef">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="DescRec" maxOccurs="unbounded">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="Code" type="xs:string" />
+										<xs:element name="Keycode" type="xs:string" />
+										<xs:element name="DBSetname" type="xs:string" />
+										<xs:element name="Reference" type="BooleanYesNoTrueFalse" />
+										<xs:element name="Name" type="xs:string" />
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+						<xs:attributeGroup ref="SectionBaseAttrs" />
+						<xs:attribute name="NumDescs" type="xs:int" use="required" />
+					</xs:complexType>
+				</xs:element>
+
+				<!-- ********** Unknown section ********** -->
+				<xs:element name="UnknownSection">
+					<xs:complexType>
+						<xs:simpleContent>
+							<xs:extension base="BinarySection">
+								<xs:attribute name="SectionType" type="xs:unsignedLong"/>
+							</xs:extension>
+						</xs:simpleContent>
+					</xs:complexType>
+				</xs:element>
+
+				<!-- ********** Copyright section ********** -->
+				<xs:element name="Copyright">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="Author" type="xs:string" />
+							<xs:element name="License" type="LicenseTypeAndVersion" />
+							<xs:element name="Comment" type="xs:string" minOccurs="0" />
+						</xs:sequence>
+						<xs:attributeGroup ref="SectionBaseAttrs" />
+					</xs:complexType>
+				</xs:element>
+				
+			</xs:choice>
+			<xs:attribute name="UNID" type="UNIDtype" use="optional" />
+			<xs:attribute name="MainGUID" type="GUIDtype" use="optional" />
+			<xs:attribute name="Owner" type="xs:int" use="required" />
+			<xs:attribute name="Signature" type="xs:unsignedLong" use="optional" />
+			<xs:attribute name="IsPlaceable" type="BooleanYesNoTrueFalse" use="required" />
+			<xs:attribute name="IsArchivable" type="BooleanYesNoTrueFalse" use="required" />
+			<xs:attribute name="MigrationValue" type="MigrationEnum" use="optional" />
+			<xs:attribute name="Version">
+				<xs:annotation>
+					<xs:documentation xml:lang="en">
+						This XML Schema describes only this version of the GRAPHISOFT Library Part XML Format.
+					</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:unsignedLong">
+						<xs:maxInclusive value="36" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+		</xs:complexType>
+		<xs:unique name="GDLPict_SubIdent">
+			<xs:selector xpath="GDLPict"/>
+			<xs:field xpath="@SubIdent" />
+		</xs:unique>
+		<xs:unique name="Binary3D_SubIdent">
+			<xs:selector xpath="Binary3D"/>
+			<xs:field xpath="@SubIdent" />
+		</xs:unique>
+	</xs:element>	<!-- Symbol -->
+</xs:schema>
