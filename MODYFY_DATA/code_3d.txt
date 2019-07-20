@@ -1,0 +1,3 @@
+if show_el=0 then end
+CALL "MEP_m_RequestSystemGlobals" PARAMETERS ALL returned_parameters gs_cont_pen, sMat, gs_InsMat, MEP_cline_pen
+if show_axis then MEP_cline_pen = gs_cont_pen

@@ -1,0 +1,3 @@
+﻿List Setup File				lis		GSAC	.LIS
+Binary List Criteria File	lic		GSAC	CRIT
+LightWorks Image File		lwi		GSAC	LWI

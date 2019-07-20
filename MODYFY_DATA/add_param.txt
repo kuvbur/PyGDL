@@ -1,0 +1,13 @@
+Name	Description	Type	Value	Flags			
+				Child	Hidden	BoldName	Unique
+show_el	Показ элемента	Boolean	1	0	1	0	0
+syst_name	Имя системы	String	!!!	0	1	0	0
+							
+							
+							
+							
+							
+							
+							
+							
+							
