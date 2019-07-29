@@ -1,13 +1,18 @@
 Name	Description	Type	Value	Flags			
 				Child	Hidden	BoldName	Unique
-show_el	Показ элемента	Boolean	1	0	1	0	0
-syst_name	Имя системы	String	!!!	0	1	0	0
-							
-							
-							
-							
-							
-							
-							
-							
-							
+mep_par_h	Скрытые параметры	Title		0	1	0	0
+show_el	Показ элемента	Boolean	1	1	1	0	0
+syst_name	Имя системы	String	!!!	1	1	0	0
+mun_elev		Boolean	0	1	1	0	0
+n_elev		Integer	0	1	1	0	0
+otm_elem		Length	0	1	1	0	0
+spec_add_param		String	!!!	1	1	0	0
+mep_par_eq	Параметры оборудования	Title		0	0	0	0
+subpos	Входит в сборку	String		1	0	0	0
+naen	Наименование	String		1	0	0	0
+obozn	Обозначение	String		1	0	0	0
+eq_code	Код	Integer		1	0	0	0
+eq_plant	Завод-изготовитель	String		1	0	0	0
+komment	Единица измерения	String		1	0	0	0
+kol_vo_spec	Кол-во	RealNum		1	0	0	0
+ves	Масса ед., кг.	RealNum		1	0	0	0
