@@ -2,14 +2,28 @@
 import os
 from datetime import datetime
 import lxml
-from lxml import etree
 import convert
 import csv
 
 curr_dir = os.path.dirname(os.path.abspath (__file__))
 convert_data_dir = os.path.abspath(os.path.join(curr_dir,'MODYFY_DATA'))
 DataBase_MainGUID_fname = os.path.join(convert_data_dir,'DataBase_MainGUID.csv')
-    
+
+def indent(elem, level=0):
+    i = "\n" + level*"  "
+    if len(elem):
+        if not elem.text or not elem.text.strip():
+            elem.text = i + "  "
+        if not elem.tail or not elem.tail.strip():
+            elem.tail = i
+        for elem in elem:
+            indent(elem, level+1)
+        if not elem.tail or not elem.tail.strip():
+            elem.tail = i
+    else:
+        if level and (not elem.tail or not elem.tail.strip()):
+            elem.tail = i      
+
 class database_guid(object):
     def __init__(self, fname_base):
         self.fname_base = fname_base
@@ -28,8 +42,8 @@ class database_guid(object):
                     level=0
                 writer.writerow([MainGUID, objname, level])
         self.read()
-                
-    def read(self):  
+
+    def read(self):
         DataBase_MainGUID = {}
         DataBase_level = {}
         with open(self.fname_base) as csv_file:
@@ -44,10 +58,10 @@ class database_guid(object):
         self.level = DataBase_level
         self.inv()
         return DataBase_MainGUID
-    
+
     def inv(self):
         self.objname = {v: k for k, v in self.MainGUID.items()}
-    
+
     def add(self, newMainGUID):
         add_flag = 0
         if type(newMainGUID) is list: newMainGUID=dict(enumerate(newMainGUID))
@@ -66,7 +80,7 @@ class database_guid(object):
 class gdl_gsm(object):
     def __init__(self, fname_xml, base_id, fname_gsm=None, fname_template=None):
         if fname_template==None : fname_template = fname_xml
-        self.defult_value={'Length':'0','Boolean':'0','String':'','Angle':'0','Title':'','Integer':'0','LineType':'1','PenColor':'1','FillPattern':'1','Material':'1','RealNum':'0'}
+        self.defult_value={'Length':'0','Boolean':'0','String':'','Angle':'0','Title':'','Integer':'0','LineType':'1','PenColor':'1','FillPattern':'1','Material':'1','RealNum':'0', 'Profile':'0', 'BuildingMaterial':'0'}
         self.valid_type_param = list(self.defult_value.keys())
         self.mode_dic = {'gen':'Script_1D','3d':'Script_3D','2d':'Script_2D',
                     'spec':'Script_PR','ui':'Script_UI','prm':'Script_VL',
@@ -96,7 +110,7 @@ class gdl_gsm(object):
             list_MainGUID.append(child.text)
             self.base_id.add(child.text)
         return list_MainGUID
-    
+
     def get_type(self):
         MainGUID = None
         name = None
@@ -136,14 +150,14 @@ class gdl_gsm(object):
     def get_Template(self):
         istemplate = self.croot.get('IsArchivable')
         return istemplate
-      
+
     def set_Template(self, newIstemplate):
         if newIstemplate !=self.istemplate : self.croot.attrib['IsArchivable']=newIstemplate
 
     def get_Placeable(self):
         isplaceable = self.croot.get('IsPlaceable')
         return isplaceable
-    
+
     def set_Placeable(self, newIsplaceable):
         if newIsplaceable !=self.isplaceable : self.croot.attrib['IsPlaceable']=newIsplaceable
 
@@ -151,16 +165,16 @@ class gdl_gsm(object):
         code_version = self.croot.get('Version')
         version = convert.inv_dict_version[code_version]
         return version
-        
+
     def set_Version(self, newVersion):
-            if newVersion !=self.version: 
+            if newVersion !=self.version:
                 code_version = convert.dict_version[newVersion]
                 self.croot.attrib['Version']=code_version
-    
+
     def get_MainGUID(self):
         MainGUID = self.croot.get('MainGUID')
         return MainGUID
-    
+
     def set_MainGUID(self, newMainGUID):
             if newMainGUID !=self.MainGUID : self.croot.attrib['MainGUID']=newMainGUID
 
@@ -168,7 +182,14 @@ class gdl_gsm(object):
         """
         Запись файла xml с последубщим конвертированием его в gsm
         """
-        self.root.write(self.fname_xml, encoding='utf-8')
+        lxml.etree.indent(self.root, space="\t")
+        txt = lxml.etree.tostring(self.root, encoding='UTF-8', xml_declaration=True).decode()
+        txt = txt.replace('[""', '["')
+        txt = txt.replace('""]', '"]')
+        txt = txt.replace('["]', '[""]')
+        with open(self.fname_xml,'tw', encoding='utf-8') as f:
+            f.write(txt)
+        # self.root.write(self.fname_xml, encoding='utf-8')
 #        if self.fname_gsm != None : convert.xml2gsm(self.fname_xml,self.fname_gsm, self.version)
 
     def close(self):
@@ -209,6 +230,17 @@ class gdl_gsm(object):
             if data_tab_txt.find(cdata_txt) == -1:
                 data_tab.text = lxml.etree.CDATA(data_tab.text + ' ')
         return data_tab
+    
+    def set_defult_pen(self):
+        param = self.croot.find('ParamSection').find('Parameters')
+        for child in param:
+            if child.tag == 'PenColor' and child.find('ArrayValues')==None:
+                name = child.get('Name')
+                pen = 1
+                if name[-2:].lower() == 'bg':
+                    pen = 19
+                child.find('Value').text = str(pen)
+                
 
     def get_tab(self, type_script, purge = False):
         """
@@ -225,7 +257,7 @@ class gdl_gsm(object):
         data_tab = self.croot.find(self.mode_dic[type_script])
         if purge : data_tab.text = lxml.etree.CDATA('')
         return data_tab
-    
+
     def get_code(self, type_script):
         data_tab = self.get_tab(type_script, purge = False)
         code = data_tab.text
@@ -248,19 +280,15 @@ class gdl_gsm(object):
         except KeyError:
             param_type_exist=None
         if param_type!=None and param_type!=param_type_exist and param_type_exist!=None:
-            print('Diff type', param_type_exist, param_type)
-            return 0
+            print('Diff type', param_type_exist, param_type, param_name, self.fname_xml)
         if not(param_type in self.valid_type_param):
-            print('Type error',param_type_exist, param_type)
-            return 0
+            print('Type error',param_type_exist, param_type, param_name)
         param_node = None
         param = self.croot.find('ParamSection').find('Parameters')
         for child in param:
             if child.get('Name') == param_name and child.tag == param_type:
                 param_node = child
         if param_node == None:
-            if param_value == None or param_value == '': param_value = self.defult_value[param_type]
-            if param_type == 'String': param_value = lxml.etree.CDATA('"'+str(param_value)+'"')
             new_param = lxml.etree.SubElement(param, param_type, Name = param_name)
             new_param_description = lxml.etree.SubElement(new_param, "Description")
             if param_Child==True or param_Hidden==True or param_BoldName==True or param_Unique==True or param_Fix==True:
@@ -270,15 +298,44 @@ class gdl_gsm(object):
             if param_type != 'Title':
                 if param_BoldName==True : lxml.etree.SubElement(new_param_flag, "ParFlg_BoldName")
                 if param_Unique==True : lxml.etree.SubElement(new_param_flag, "ParFlg_Unique")
-                new_param_value = lxml.etree.SubElement(new_param, "Value")
-                new_param_value.text = param_value
+                if type(param_value)==list :
+                    f_dimension = len(param_value)-1
+                    s_dimension = 1
+                    if type(param_value[0])==list:
+                        s_dimension = len(param_value[0])-1
+                    array_value = lxml.etree.SubElement(new_param, "ArrayValues", FirstDimension = str(f_dimension-1), SecondDimension = str(s_dimension-1))
+                    for i in range(1,f_dimension):
+                        if s_dimension>1:
+                            for j in range(1,s_dimension):
+                                pval = param_value[i][j]
+                                if param_type == 'String': pval = lxml.etree.CDATA('"'+str(pval)+'"')    
+                                el = lxml.etree.SubElement(array_value, "AVal", Row = str(i), Column = str(j))
+                                el.text = pval
+                        else:
+                            pval = param_value[i]
+                            if param_type == 'String': pval = lxml.etree.CDATA('"'+str(pval)+'"')    
+                            el = lxml.etree.SubElement(array_value, "AVal", Row = str(i))
+                            el.text = pval                            
+                else:
+                    if param_value == None or param_value == '' or param_type!=param_type_exist: param_value = self.defult_value[param_type]
+                    if param_type == 'String': param_value = lxml.etree.CDATA('"'+str(param_value)+'"')
+                    new_param_value = lxml.etree.SubElement(new_param, "Value")    
+                    new_param_value.text = param_value
             new_param_description.text = lxml.etree.CDATA('"'+param_description+'"')
             rezult = 2
         else:
-            if param_description!=None and param_description!=self.parameters[param_name]['Description'] : param_node.find('Description').text = lxml.etree.CDATA('"'+param_description+'"')
-            if param_value!=None and param_value!=self.parameters[param_name]['Value'] and param_type != 'Title' :
-                if param_type == 'String': param_value = lxml.etree.CDATA('"'+str(param_value)+'"')
-                param_node.find('Value').text = param_value
+            return 1
+            if param_description!=None : param_node.find('Description').text = lxml.etree.CDATA('"'+param_description+'"')
+            if param_value!=None and param_type != 'Title' :
+                if type(param_value)==list :
+                    f_dimension = len(param_value)-1
+                    s_dimension = 1
+                    if type(param_value[0])==list:
+                        s_dimension = len(param_value[0])-1
+##TODO Добавить перезапись массивов
+                else:
+                    if param_type == 'String': param_value = lxml.etree.CDATA('"'+str(param_value)+'"')
+                    param_node.find('Value').text = param_value
             self._set_flag(param_name,'Fix', param_Fix)
             if param_type != 'Title':
                 self._set_flag(param_name,'Fix', param_Child)
@@ -286,15 +343,21 @@ class gdl_gsm(object):
                 self._set_flag(param_name,'Fix', param_BoldName)
                 self._set_flag(param_name,'Fix', param_Unique)
             rezult = 1
+        full_name = os.path.basename(self.fname_xml)
+        name = os.path.splitext(full_name)[0]
+        if rezult == 1:
+            print(" Add ", name, param_name)
+        else:
+            print("New",  name, param_name)            
         return rezult
 
     def _set_flag(self, param_name, key_flag, value):
-        if value !=None : 
+        if value !=None :
             param = self.croot.find('ParamSection').find('Parameters')
             for child in param:
                 if child.get('Name') == param_name and child.tag == self.parameters[param_name]['Type']:
                     param_node = child
-            if not(self.parameters[param_name]['Flags']) and value==True and key_flag != 'Fix':
+            if not(self.parameters[param_name].setdefault('Flags') != None) and value==True and key_flag != 'Fix':
                 param_flag = lxml.etree.SubElement(param_node, "Flags")
             else:
                 param_flag = param_node.find("Flags")
@@ -323,28 +386,44 @@ class gdl_gsm(object):
                     param_list[title] = {}
                     param_list[title]['Type'] = 'Title'
                     param_list[title]['List'] = []
+                else:
+                    param_list[param_name] = {}
                 if child.find('Description') != None :
-                    param_description = child.find('Description').text
+                    param_list[param_name]['Description'] = child.find('Description').text
+                array_child = child.find('ArrayValues')
+                if array_child != None :
+                    f_dimension = int(array_child.get('FirstDimension'))
+                    s_dimension = int(array_child.get('SecondDimension'))
+                    if s_dimension>0:
+                        row = [None for i in range(s_dimension+2)]
+                        value = [row for i in range(f_dimension+2)]
+                    else:
+                        value = [None for i in range(f_dimension+2)]
+                    for c in array_child.findall('AVal'):
+                        val = c.text
+                        r = int(c.get('Row'))
+                        c = c.get('Column')
+                        if c !=None:
+                            c = int(c)
+                            value[r][c] = val
+                        else:
+                            try:
+                                value[r] = val    
+                            except IndexError:
+                                print(r)
+                            
+                    param_list[param_name]['Value'] = value
                 else:
-                    param_description = None
-                if child.find('Value') != None :
-                    param_value = child.find('Value').text
-                else:
-                    param_value = None
+                    if child.find('Value') != None :
+                        param_list[param_name]['Value'] = child.find('Value').text
                 ParFlg = child.find("Flags")
-                param_Fix = (child.find("Fix") != None)
-                if ParFlg == None :
-                    param_Child = False
-                    param_Hidden = False
-                    param_BoldName = False
-                    param_Unique = False
-                    param_Flg = False
-                else:
-                    param_Child = (ParFlg.find("ParFlg_Child") != None)
-                    param_Hidden = (ParFlg.find("ParFlg_Hidden") != None)
-                    param_BoldName = (ParFlg.find("ParFlg_BoldName") != None)
-                    param_Unique = (ParFlg.find("ParFlg_Unique") != None)
-                    param_Flg = True
+                param_list[param_name]['Fix'] = (child.find("Fix") != None)
+                if ParFlg != None :
+                    param_list[param_name]['ParFlg_Child'] = (ParFlg.find("ParFlg_Child") != None)
+                    param_list[param_name]['ParFlg_Hidden'] = (ParFlg.find("ParFlg_Hidden") != None)
+                    param_list[param_name]['ParFlg_BoldName'] = (ParFlg.find("ParFlg_BoldName") != None)
+                    param_list[param_name]['ParFlg_Unique'] = (ParFlg.find("ParFlg_Unique") != None)
+                    param_list[param_name]['Flags'] = True
                 try:
                     param_list[title]['List'].append(param_name)
                 except KeyError:
@@ -352,30 +431,21 @@ class gdl_gsm(object):
                     param_list[title]['List'] = []
                     param_list[title]['Type'] = 'EmptyTitle'
                     param_list[title]['List'].append(param_name)
-                param_list[param_name] = {}
                 param_list[param_name]['Type'] = param_type
-                param_list[param_name]['Description'] = param_description
-                param_list[param_name]['Value'] = param_value
-                param_list[param_name]['ParFlg_Child'] = param_Child
-                param_list[param_name]['ParFlg_Hidden'] = param_Hidden
-                param_list[param_name]['ParFlg_BoldName'] = param_BoldName
-                param_list[param_name]['ParFlg_Unique'] = param_Unique
-                param_list[param_name]['Fix'] = param_Fix
-                param_list[param_name]['Flags'] = param_Flg
         return param_list
 
     def set_param_dic(self, param_dic):
-        for k,i in param_dic.items():
-            param_name = k
-            param_type=param_dic[param_name]['Type']
-            param_description=param_dic[param_name]['Description']
-            param_value=param_dic[param_name]['Value']
-            param_Child=param_dic[param_name]['ParFlg_Child']
-            param_Hidden=param_dic[param_name]['ParFlg_Hidden']
-            param_BoldName=param_dic[param_name]['ParFlg_BoldName']
-            param_Unique=param_dic[param_name]['ParFlg_Unique']
-            param_Fix=param_dic[param_name]['Fix']
-            self.set_param(param_name, param_type, param_description, param_value, param_Child, param_Hidden, param_BoldName, param_Unique, param_Fix)
+        for param_name,val in param_dic.items():
+            param_type=val.setdefault('Type')
+            if param_type in self.valid_type_param:
+                param_value=val.setdefault('Value')
+                param_description=val.setdefault('Description')
+                param_Child=val.setdefault('ParFlg_Child')
+                param_Hidden=val.setdefault('ParFlg_Hidden')
+                param_BoldName=val.setdefault('ParFlg_BoldName')
+                param_Unique=val.setdefault('ParFlg_Unique')
+                param_Fix=None
+                self.set_param(param_name, param_type, param_description, param_value, param_Child, param_Hidden, param_BoldName, param_Unique, param_Fix)
 
 
     def gen(self, code):
@@ -572,7 +642,7 @@ if __name__ == "__main__":
     convert_temp_dir = os.path.abspath(os.path.join(curr_dir,'CONVERT','xml'))
     base = database_guid(DataBase_MainGUID_fname)
     for root, dirs, files in os.walk(convert_temp_dir):
-        for nm in files:       
+        for nm in files:
             if nm.find(".xml")>0:
                 fname_xml = os.path.join(root, nm)
                 test_obj = gdl_gsm(fname_xml, base)

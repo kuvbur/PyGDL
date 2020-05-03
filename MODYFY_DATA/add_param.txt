@@ -1,18 +1,223 @@
 Name	Description	Type	Value	Flags			
 				Child	Hidden	BoldName	Unique
-mep_par_h	Скрытые параметры	Title		0	1	0	0
-show_el	Показ элемента	Boolean	1	1	1	0	0
-syst_name	Имя системы	String	!!!	1	1	0	0
-mun_elev		Boolean	0	1	1	0	0
-n_elev		Integer	0	1	1	0	0
-otm_elem		Length	0	1	1	0	0
-spec_add_param		String	!!!	1	1	0	0
-mep_par_eq	Параметры оборудования	Title		0	0	0	0
-subpos	Входит в сборку	String		1	0	0	0
-naen	Наименование	String		1	0	0	0
-obozn	Обозначение	String		1	0	0	0
-eq_code	Код	Integer		1	0	0	0
-eq_plant	Завод-изготовитель	String		1	0	0	0
-komment	Единица измерения	String		1	0	0	0
-kol_vo_spec	Кол-во	RealNum		1	0	0	0
-ves	Масса ед., кг.	RealNum		1	0	0	0
+GS_daimoon_A		Title		0	0	0	0
+nazn	Примечание	String	АС	0	0	0	0
+zap2txt	Заполнение окна в спецификацию	Boolean	0	0	1	0	0
+krugl	Круглое отверстие	Boolean	0	0	0	0	0
+asotv	Показывать маркировку отверстия	Boolean	0	0	0	0	0
+kirp	Проём в кирпиче	Boolean	0	0	0	0	0
+in_sand	Окно в сэндвиче	Boolean	0	0	1	0	0
+spec		Title		0	0	0	0
+naen	Наименование	String	ОП  900-1 500 (4М1-16-К4)	1	1	0	0
+obozn	Обозначение	String	ГОСТ 30674-99	1	1	0	0
+tip_spec	Размеры в спецификацию	String	Размер проёма	1	1	0	0
+type	Тип	String	ПВХ	1	1	0	0
+vid	Вид	String	ОП	1	1	0	0
+zap	Заполнение	String	(4М1-16-К4)	1	1	0	0
+end_txt	Текст в конце наименования	String		1	0	0	0
+Rpriv	Приведенное сопротивление теплопередаче	RealNum	0	1	1	0	0
+konst	Конструкция	String		1	1	0	0
+ves	Масса ед., кг.	RealNum	0	1	0	0	0
+ves_area	Масса кв.м. для ориентировочного расчёта	RealNum	0	1	0	0	0
+area_zap	Площадь, кв.м.	RealNum	0	1	0	0	0
+razm_unit	Единицы измерения размеров	Integer	1	1	0	0	0
+razm_metod	Порядок размеров	Integer	1	1	0	0	0
+firest	Огнестойкость	String	Нет	1	0	0	0
+naen_otv	Поз. отверстия	String		1	0	0	0
+razm	Размеры, мм.	String	400x400(h)	1	0	0	0
+otm_niz	Отм. низа отв.	String	2,04	1	0	0	0
+razm_otv_B	Ширина отверстия	Length	0.4	1	0	0	0
+razm_otv_H	Высота отверстия	Length	0.4	1	0	0	0
+pen_nazn	Цвет по назначению	PenColor		1	1	0	0
+i_pen	Перо	PenColor	181	1	1	0	0
+krat_txt	Кратность размеров	Length	0.005	1	0	0	0
+sbros	Сброс положения обозначения проёма	Boolean	0	1	0	0	0
+otdel_otk	Отделка откосов	Boolean	0	1	0	0	0
+s_otk	Площадь откосов	RealNum	0	1	0	0	0
+t_utepl	Толщина утеплителя	Length	0	0	1	0	0
+l_podok	Длина подоконника	Length	0	1	0	0	0
+t_podok	Ширина подоконника	Length	0	1	0	0	0
+GS_daimoon_C		Title		0	0	0	0
+perem_otm	Отметки низа марки	String		1	0	0	0
+manual_elev	Вручную выставить собственный этаж	Boolean	0	1	0	0	0
+n_elev	Номер этажа	Integer	0	1	0	0	0
+nes_sloi	Номер несущего слоя	Integer	1	1	1	0	0
+otm_ved	Отметки в ведомость	String		1	1	0	0
+ur	Уровень	String	2,44	1	0	0	0
+ur_num	Уровень числом	Length	16103	0	0	0	0
+use_bst	Железобетонное обрамление	Boolean	0	0	0	1	0
+bst	Толщина сердечника	Length	0.13	1	0	0	0
+raspol	Расположение	String	Оба	1	0	0	0
+diam_arm_st_osn	Диаметр основной арматуры 	Length	0.01	1	0	0	0
+marka_st_osn	Марка основной	String	A500C	1	0	0	0
+diam_arm_st_hom	Диаметр хомутов	Length	0.008	1	0	0	0
+marka_st_hom	Марка хомутов	String	A-I(A240)	1	0	0	0
+l_vkl	Глубина вклейки арматуры сердечника	Length	0.15	1	0	0	0
+f_st	Штриховка	FillPattern	430	1	0	0	0
+p_st	Перо плана	PenColor	21	1	0	0	0
+p_sech_st	Перо сечения	PenColor	41	1	0	0	0
+p_f_st	Перо штриховки	PenColor	1	1	0	0	0
+l_left	Продлить влево	Length	0	1	0	0	0
+l_right	Продлить вправо	Length	0	1	0	0	0
+l_up	Продлить вверх	Length	0	1	0	0	0
+l_down	Продлить вниз	Length	0	1	0	0	0
+GS_daimoon_B		Title		0	0	0	0
+board_gost	ГОСТ подоконной доски	String	ГОСТ 30673-99	0	1	0	0
+gs_doorwindow_trim	Обшивка	String	Откл.	0	1	1	0
+gs_sill_type	Тип подоконника	String		1	0	0	0
+gs_brick_sill_detlev	Уров.3D-деталей кирпич.подокон.	String	Простой	1	0	0	0
+gs_boardInPolyWall	Доска в многоуг. стене	String	Параллельно окну	1	0	0	0
+gs_sunShade_type	Тип навеса	String	Нет	0	1	1	0
+gs_shutPanel_resolHole	Разрешение отвестия	Integer	3	1	0	0	0
+gs_masonry_arch	Каменная арка	String	Откл.	0	1	1	0
+gs_custom_cc_edit_jamb_side	Редактируемый косяк сбоку	String	Редактируемые оба косяка	1	0	0	0
+gs_custom_cc_edit_wall_side	Редактируемая сторона стены	String	Сторона привязки	1	0	0	0
+gs_custom_cc_edit_skin	Редактируемый номер слоя	String	1. Слой	1	0	0	0
+gs_custom_cc_thickness_type	Толщина поворота внутрь	String	Исходный	1	0	0	0
+gs_custom_cc_orientation	Ориентация штриховки	String	Исходный	1	0	0	0
+gs_glass_mat_eq	Одинаковый материал остекления	Boolean	1	1	0	0	0
+gs_glass_01_mat	Остекление 1	Material	24	1	0	0	0
+gs_glass_02_mat	Остекление 2	Material	24	1	0	0	0
+gs_glass_03_mat	Остекление 3	Material	24	1	0	0	0
+gs_glass_04_mat	Остекление 4	Material	24	1	0	0	0
+gs_glass_05_mat	Остекление 5	Material	24	1	0	0	0
+gs_glass_06_mat	Остекление 6	Material	24	1	0	0	0
+gs_glass_07_mat	Остекление 7	Material	24	1	0	0	0
+gs_glass_08_mat	Остекление 8	Material	24	1	0	0	0
+gs_glass_09_mat	Остекление 9	Material	24	1	0	0	0
+gs_glass_10_mat	Остекление 10	Material	24	1	0	0	0
+gs_glass_11_mat	Остекление 11	Material	24	1	0	0	0
+perem_marka_sum	Контрольная строка перемычки	String	2ПБ101/3/_	0	0	0	0
+perem_pos_reset	Сброс позиций	Boolean	0	1	0	0	0
+perem_marka_reset	Сброс имени марки	Boolean	0	1	0	0	0
+perem_reset	Сброс позиции и марки	Boolean	0	1	0	0	0
+gs_DemolitionOrNew	Разборка / Новая конструкция	String	Нет	0	1	1	0
+gs_Demolition_fill	Тип штриховки разборки	FillPattern	0	1	1	0	0
+gs_Demolition_pen_fg	Перо разборки	PenColor	0	1	1	0	0
+gs_Demolition_pen_bg	Перо фона разборки	PenColor	0	1	1	0	0
+gs_ui_sub_tabpage		Integer	1	0	1	0	1
+gs_list_custom1	Задается пользов. 1	String	Перемычка брусковая 2ПБ26-4	1	0	0	0
+gs_list_custom2	Задается пользов. 2	String	ГОСТ 948-2016	1	0	0	0
+gs_list_custom3	Задается пользов. 3	String	109	1	0	0	0
+gs_list_custom4	Задается пользов. 4	String		1	0	0	0
+gs_list_custom5	Задается пользов. 5	String		1	0	0	0
+gs_opside	Сторона открыв. в кривол. стене	String		1	0	0	0
+bSymbol2D	2D-символ	Boolean	1	1	0	0	0
+fillTypeCurved	Тип штрих.в кривол. стене	String	Тип 1	1	0	0	0
+symbolPen	Перо символа	PenColor	1	1	0	0	0
+gs_fill_pen_2	Перо штриховки 2	PenColor	19	1	0	0	0
+gs_ConnTypeRight	Тип соединения правого угла	String	Рамка	1	1	0	0
+gs_ConnTypeLeft	Тип соединения угла	String	Рамка	1	0	0	0
+upr_rezhim	Не отображать в режиме	String	Откл	1	0	0	0
+chetv	Четверть в несущем слое	Length	0	1	0	0	0
+porog	Расширить высоту проёма на	Length	0	1	0	0	0
+fillTypeNormal	Образец штриховки отверстия	FillPattern	21	1	0	0	0
+show_diag	Показывать обозначение проёма диагональными линиями	Boolean	1	0	0	0	0
+perem_sp_comm		Title		0	0	0	0
+perem_marka	Марка перемычки	String		1	0	0	0
+perem_qty_type	Использовать тип	Boolean		1	0	0	0
+perem_eq_dl	Одинаковое смещение по горизонтали	Boolean	1	1	0	0	0
+perem_th_by_layer	Ширина типа по слою	Integer		1	0	0	0
+perem_sp_zazor		Title		0	0	0	0
+perem_zazor_type	Зазор между типами	Length		1	0	0	0
+perem_zazor_by_layer	Величина зазора по слою	Integer		1	0	0	0
+perem_sp_type_1		Title		0	0	0	0
+perem_type_1	Тип перемычки	Integer	1	1	0	0	0
+perem_subtype_1	Тип сборной перемычки	String	Любая брусковая	1	0	0	0
+perem_min_opir_1	Минимальное опирание	Length	0.12	1	0	0	0
+perem_podbor_1	Автоподбор	Boolean	1	1	0	0	0
+perem_t_1	Ограничение толщины	Length	0.12	1	0	0	0
+perem_h_1	Ограничение высоты	Length	0	1	0	0	0
+perem_dh_1	Смещение по высоте	Length	0	1	0	0	0
+perem_dhf_1	Смещение только первого	Boolean	0	1	0	0	0
+perem_dhe_1	Смещение только последнего	Boolean	0	1	0	0	0
+perem_dl_1	Смещение по длине	Length	0	1	0	0	0
+perem_zazor_1	Зазор между элементами	Length	0	1	0	0	0
+perem_qty_by_type_1	Кол-во элементов тип 1	Integer	3	1	0	0	0
+perem_profile_1	Элемент	String	2ПБ10-1	1	0	0	0
+perem_ves_p_1	Вес п.м.	RealNum	0	1	0	0	0
+perem_pos_1	Поз. типа 1	String		1	0	0	0
+perem_sp_type_2		Title		0	0	0	0
+perem_type_2	Тип перемычки	Integer	2	1	0	0	0
+perem_subtype_2	Тип сборной перемычки	String	Любая брусковая	1	0	0	0
+perem_min_opir_2	Минимальное опирание	Length	0.12	1	0	0	0
+perem_podbor_2	Автоподбор	Boolean	1	1	0	0	0
+perem_t_2	Ограничение толщины	Length	0	1	0	0	0
+perem_h_2	Ограничение высоты	Length	0.22	1	0	0	0
+perem_dh_2	Смещение по высоте	Length	0	1	0	0	0
+perem_dhf_2	Смещение только первого	Boolean	0	1	0	0	0
+perem_dhe_2	Смещение только последнего	Boolean	0	1	0	0	0
+perem_dl_2	Смещение по длине	Length	0	1	0	0	0
+perem_zazor_2	Зазор между элементами	Length	0	1	0	0	0
+perem_qty_by_type_2	Кол-во элементов тип 2	Integer	1	1	0	0	0
+perem_profile_2	Элемент	String		1	0	0	0
+perem_pos_2	Поз. типа 2	String		1	0	0	0
+perem_ves_p_2	Вес п.м.	RealNum	0	1	0	0	0
+perem_sp_type_3		Title		0	0	0	0
+perem_type_3	Тип перемычки	Integer	2	1	0	0	0
+perem_subtype_3	Тип сборной перемычки	String	Любая брусковая	1	0	0	0
+perem_min_opir_3	Минимальное опирание	Length	0.12	1	0	0	0
+perem_podbor_3	Автоподбор	Boolean	1	1	0	0	0
+perem_t_3	Ограничение толщины	Length	0	1	0	0	0
+perem_h_3	Ограничение высоты	Length	0.22	1	0	0	0
+perem_dh_3	Смещение по высоте	Length	0	1	0	0	0
+perem_dhf_3	Смещение только первого	Boolean	0	1	0	0	0
+perem_dhe_3	Смещение только последнего	Boolean	0	1	0	0	0
+perem_dl_3	Смещение по длине	Length	0	1	0	0	0
+perem_zazor_3	Зазор между элементами	Length	0	1	0	0	0
+perem_qty_by_type_3	Кол-во элементов тип 3	Integer	1	1	0	0	0
+perem_profile_3	Элемент	String		1	0	0	0
+perem_pos_3	Поз. типа 3	String		1	0	0	0
+perem_ves_p_3	Вес п.м.	RealNum	0	1	0	0	0
+perem_sp_type_4		Title		0	0	0	0
+perem_type_4	Тип перемычки	Integer	2	1	0	0	0
+perem_subtype_4	Тип сборной перемычки	String	Любая брусковая	1	0	0	0
+perem_min_opir_4	Минимальное опирание	Length	0.12	1	0	0	0
+perem_podbor_4	Автоподбор	Boolean	1	1	0	0	0
+perem_t_4	Ограничение толщины	Length	0	1	0	0	0
+perem_h_4	Ограничение высоты	Length	0.22	1	0	0	0
+perem_dh_4	Смещение по высоте	Length	0	1	0	0	0
+perem_dhf_4	Смещение только первого	Boolean	0	1	0	0	0
+perem_dhe_4	Смещение только последнего	Boolean	0	1	0	0	0
+perem_dl_4	Смещение по длине	Length	0	1	0	0	0
+perem_zazor_4	Зазор между элементами	Length	0	1	0	0	0
+perem_qty_by_type_4	Кол-во элементов тип 4	Integer	1	1	0	0	0
+perem_profile_4	Элемент	String		1	0	0	0
+perem_pos_4	Поз. типа 4	String		1	0	0	0
+perem_ves_p_4	Вес п.м.	RealNum	0	1	0	0	0
+perem_arm		Title		0	0	0	0
+perem_diam	Диаметр основной арматуры	Length	8	1	0	0	0
+perem_diam_dop	Диаметр хомутов	Length	4	1	0	0	0
+perem_shag_dop	Шаг хомутов	Length	0.15	1	0	0	0
+perem_shag_osn	Шаг основной арматуры	Length	0.05	1	0	0	0
+perem_class	Класс основной арматуры	String	А500С	1	0	0	0
+perem_class_dop	Класс арматуры хомутов	String	А240	1	0	0	0
+perem_concr	Марка раствора (бетона)	String	М150	1	0	0	0
+perem_array		Title		0	0	0	0
+perem_nagr_max	Максимальная нагрузка на марку	RealNum	100	1	0	0	0
+perem_nagr	Максимальная нагрузка на элемент	RealNum		1	0	0	0
+perem_ves	Вес типа	RealNum		1	0	0	0
+perem_obozn	Обозначение типа	String		1	0	0	0
+perem_naen	Наименование типа	String		1	0	0	0
+perem_dlin	Длина типа	Length		1	0	0	0
+perem_t	Толщина типа	Length		1	0	0	0
+perem_h	Высота типа	Length		1	0	0	0
+perem_tug	Толщина уголка	Length		1	0	0	0
+perem_callparam	Параметры из проёма	Title		0	1	0	0
+upr_n		Integer	-1	1	1	0	0
+gs_param_level	Параметрич. уровень	String	Высокий	1	1	0	0
+gs_detlevel_2D	Уровень 2D-деталей	String	Зависит от масштаба	1	1	0	0
+gs_reveal_on_symbol	Показать четверть в символе	String	Всегда	1	1	0	0
+gs_opening_dir	Направл. открывания	String	Внутри	1	1	0	0
+gs_detlevel_3D	Уровень 3D-деталей	String	Детальный	1	0	0	0
+gs_readable_angle		Angle	90	1	1	0	0
+WALL_COMPS_NAME_	Имя конструкции стены	String	ГКЛ - перегородка C112 125 мм	1	0	0	0
+WALL_SKINS_NUMBER_	Количество слоёв	Integer	5	1	0	0	0
+WALL_SKINS_PARAMS_	Слои	Length		1	0	0	0
+WALL_THICKNESS_	Общая толщина стены	Length	0.125	1	0	0	0
+max_t	Толщина несущего слоя	Length	0.125	1	0	0	0
+otstup	Расстояние до несущего слоя	Length	0.0625	1	0	0	0
+otstup_2	Расстояние до несущего слоя-2	Length	0	1	0	0	0
+auto_otstup	Автоматический отступ к несущему слою	Boolean	0	1	0	0	0
+pos_x		Length	0.04	0	1	0	0
+pos_y		Length	0.08	0	1	0	0

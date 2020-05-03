@@ -140,3 +140,10 @@ $RECYCLE.BIN/
 *.gsm
 *.xml
 *.png
+
+CONVERT/*
+MODYFY_DATA/*
+.spyproject/*
+*.RPT
+*.dbe
+.pylint.d/*

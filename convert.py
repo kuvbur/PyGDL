@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import sys
 from subprocess import Popen, PIPE, STDOUT, CalledProcessError
 import shlex
 import logging
@@ -12,6 +13,8 @@ inv_dict_version = {v: k for k, v in dict_version.items()}
 #https://www.graphisoft.com/ftp/techsupport/documentation/developer_docs/AC_11/APIDevKit/LPXML%20Documentation/LP_XMLConverter.html
 log_file = os.path.join(curr_dir, 'convert_test.log')
 logging.basicConfig(filename=log_file, level=logging.DEBUG)
+
+
 def run_shell_command(command_line):
     command_line_args = shlex.split(command_line)
     try:
@@ -46,8 +49,8 @@ def finalizexml(fpath_xml,fpath_gsm,version,reportlevel=1, verbosityLevel=1):
     """
     Проверяет ошибки, обновляет вкладки параметров
     """
-    fpath_xml = '"' + fpath_xml + '"'
-    fpath_gsm = '"' + fpath_gsm + '"'
+    fpath_xml = '"' + str(fpath_xml) + '"'
+    fpath_gsm = '"' + str(fpath_gsm) + '"'
     checkall_txt = '-reportlevel %d' % (reportlevel)
     if reportlevel==2 : checkall_txt = "-checkall"
     path_LP_XMLConverter = getconverter(version)
@@ -55,13 +58,12 @@ def finalizexml(fpath_xml,fpath_gsm,version,reportlevel=1, verbosityLevel=1):
     rezult = run_shell_command(cmd)
     return rezult
 
-
 def gsm2xml(fname_xml,fname_gsm,version):
     """
     Переводит объект gsm в xml
     """
-    fname_gsm = '"' + fname_gsm + '"'
-    fname_xml = '"' + fname_xml + '"'
+    fname_gsm = '"' + str(fname_gsm) + '"'
+    fname_xml = '"' + str(fname_xml) + '"'
     path_LP_XMLConverter = getconverter(version)
     cmd = '%s libpart2xml -l UTF8 %s %s' % (path_LP_XMLConverter, fname_gsm, fname_xml)
     rezult = run_shell_command(cmd)
@@ -91,11 +93,17 @@ def xml2gsm(fname_xml,fname_gsm,version):
     return rezult
 
 def get_fname_gsm(fname):
-    fname_gsm = os.path.join(convert_dir,'gsm', fname).encode('cp1251')
+    fname_gsm = os.path.join(convert_dir,'gsm', fname)
+    # fname_gsm = fname_gsm.encode(sys.getfilesystemencoding())
+    if not os.path.exists(os.path.dirname(fname_gsm)):
+        os.makedirs(os.path.dirname(fname_gsm))
     return fname_gsm
 
 def get_fname_xml(fname):
-    fname_xml = os.path.join(convert_dir,'xml', fname).encode('cp1251')
+    fname_xml = os.path.join(convert_dir,'xml', fname)
+    # fname_xml = fname_xml.encode(sys.getfilesystemencoding())
+    if not os.path.exists(os.path.dirname(fname_xml)):
+        os.makedirs(os.path.dirname(fname_xml))
     return fname_xml
 
 def repair_xml(version,text):
@@ -108,10 +116,13 @@ def repair_xml(version,text):
     return repair_text
 
 def convert_gsm(version_to, fname, version_from=None, save_gsm=True):
-    fname_gsm_from = get_fname_gsm(fname + ".gsm")
+    fname_gsm_from = fname
+    fname_path = os.path.dirname(fname).decode('utf-8')
+    fname = os.path.basename(fname).decode('utf-8')
+    fname = fname.split('.')[0]
     if version_from==None: version_from, rez = get_version_gsm(fname_gsm_from)
-    fname_gsm_to = get_fname_gsm(fname +"_" + str(version_to) + ".gsm")
-    fname_xml = get_fname_xml(fname +"_" + str(version_to) + ".xml")
+    fname_gsm_to = os.path.join(fname_path, fname +"_" + str(version_to) + ".gsm")
+    fname_xml = os.path.join(fname_path, fname +"_" + str(version_to) + ".xml")
     gsm2xml(fname_xml,fname_gsm_from, version_from)
     with open(os.path.join(convert_dir,'xml', fname_xml), encoding="utf-8") as file_in:
         text = file_in.read()
@@ -145,8 +156,8 @@ def get_version_gsm(fname_gsm):
 
 if __name__ == "__main__":
     os.chdir (curr_dir)
-#    version_gsm, rezult = get_version_gsm(get_fname_gsm("test_19.gsm"))
-#    print(version_gsm, rezult)
+    version_gsm, rezult = get_version_gsm(get_fname_gsm("Перемычки .gsm"))
+    print(version_gsm, rezult)
 #    fname_gsm_to = convert_gsm(19, "test_19")
 
 
