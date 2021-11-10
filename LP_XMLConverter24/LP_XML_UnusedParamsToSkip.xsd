@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+	<xs:simpleType name="ParamName">
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="31" />
+			<xs:pattern value="[a-zA-Z_~][a-zA-Z_~0-9]*" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="LibpartName">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="1" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="GUIDtype">
+		<xs:annotation>
+			<xs:documentation xml:lang="en">
+				The preferred format is XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX.
+				The exact format is described in the regular expression.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:pattern value="[0-9a-fA-F]{8}([+\-/*.,; ]*[0-9a-fA-F]{4}){2}([+\-/*.,; ]*[0-9a-fA-F]{2}){8}" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="UnusedPars">
+		<xs:sequence>
+			<xs:element name="Param" type="ParamName" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="UnusedPars_Libpart">
+		<xs:sequence>
+			<xs:choice minOccurs="1" maxOccurs="1">
+				<xs:element name="Name" type = "LibpartName" />
+				<xs:element name="MainGUID" type="GUIDtype"/>
+			</xs:choice>
+			<xs:element name="Param" type="ParamName" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="UnusedParsToSkip">
+		<xs:complexType>
+			<xs:choice minOccurs="1" maxOccurs="unbounded">
+				<xs:element name="Common" type="UnusedPars"/>
+				<xs:element name="LibPart" type="UnusedPars_Libpart"/>
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

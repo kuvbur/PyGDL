@@ -8,54 +8,60 @@ import os
 import convert
 import batch_modify
 import gdl_gsm
-from shutil import copy
-import subprocess
-import sys
 
-force_conv = True
+
+def set_path(path):
+    path = os.path.abspath(path)
+    if not os.path.exists(path):
+        os.makedirs(path, exist_ok=True)
+    return os.path.abspath(path)
+
 
 # =============================================================================
 # Имена файлов с параметрами
 # =============================================================================
-add_file = ['Перемычки']
-
+add_file = ['Mep_param']
+force_conv = True  # Нужно ли конвертировать gsm в xml или брать сразу из папки xml_conv
+version = 25
 # =============================================================================
-curr_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-convert_temp_dir = os.path.abspath(os.path.join(curr_dir, 'CONVERT', 'xml'))
-convert_old_dir = os.path.abspath(os.path.join(curr_dir, 'CONVERT', 'gsm'))
-convert_new_dir = os.path.abspath(os.path.join(curr_dir, 'CONVERT', 'gsm_out'))
+# Располагаем исходные файлы в папке 'gsm'
+# Промежуточные файлы будут сохранены в папку 'xml'
+# Откуда конвертер переводит их формат gsm и копирует в папку 'gdlnew'
+
+curr_dir = "D:\\"
+os.chdir(curr_dir)
+convert_old_dir = set_path(os.path.join(curr_dir, 'gsm'))
+convert_temp_dir = set_path(os.path.join(curr_dir, 'xml'))
+convert_new_dir = set_path(os.path.join(curr_dir, 'gsmnew'))
 base = batch_modify.get_base()
 
 param = {}
 for from_fname in add_file:
-    abs_gsm_from_name = convert.get_fname_gsm(from_fname+".gsm")
-    abs_xml_from_name = convert.get_fname_xml(from_fname+".xml")
-    if os.path.isfile(abs_xml_from_name)==False or force_conv:
-        r =convert.gsm2xml(abs_xml_from_name,abs_gsm_from_name,22)
-        from_obj = gdl_gsm.gdl_gsm(abs_xml_from_name, base)
-#     param_from = from_obj.get_param_list()
-#     for k in param_from.keys():
-#         try:
-#             h = param_from[k]['Fix']
-#         except KeyError:
-#             param_from[k]['Fix'] = True
-#         if param_from[k]['Fix'] == False:
-#             param[k] = param_from[k]
+    abs_gsm_from_name = os.path.join(convert_old_dir, from_fname + ".gsm")
+    abs_xml_from_name = os.path.join(convert_temp_dir, from_fname + ".xml")
+    if not os.path.isfile(abs_xml_from_name) or force_conv:
+        r = convert.gsm2xml(abs_xml_from_name, abs_gsm_from_name, version)
+    from_obj = gdl_gsm.gdl_gsm(abs_xml_from_name, base)
+    param_from = from_obj.get_param_list()
+    for k in param_from.keys():
+        try:
+            h = param_from[k]['Fix']
+        except KeyError:
+            param_from[k]['Fix'] = True
+        if not param_from[k]['Fix']:
+            param[k] = param_from[k]
 
-# convert_temp_dir = os.path.abspath(os.path.join(curr_dir,'CONVERT','xml','conv'))
-# convert_old_dir = os.path.abspath(os.path.join(curr_dir,'CONVERT','gsm','conv'))
-# convert.gsm2xml_batch(convert_temp_dir, convert_old_dir, 22)
-# for root, dirs, files in os.walk(convert_temp_dir):
-#     for nm in files:
-#         if nm.find(".xml")>0: #Рисунки и текстовые файлы не нужны
-#             fname_xml = os.path.join(root, nm) #Полный путь к файлу
-#             test_obj = gdl_gsm.gdl_gsm(fname_xml, base)
-#             test_obj.set_param_dic(param)
-#             test_obj.set_defult_pen()
-#             test_obj.close()
-#             copy(fname_xml, "D:\\xml")
-# if os.path.isfile('D:\\gdl_log.txt'):
-#     os.remove('D:\\gdl_log.txt')  
-# p = subprocess.Popen("D:\\2gdl.bat", shell=True, stdout = subprocess.PIPE)
-# stdout, stderr = p.communicate()
-
+if force_conv:
+    convert.gsm2xml_batch(convert_temp_dir, convert_old_dir, version)
+for root, dirs, files in os.walk(convert_temp_dir):
+    for nm in files:
+        if nm.find(".xml") > 0:  # Рисунки и текстовые файлы не нужны
+            fname_xml = os.path.join(root, nm)  # Полный путь к файлу
+            test_obj = gdl_gsm.gdl_gsm(fname_xml, base)
+            n_del = test_obj.del_param_dic(param)
+            n_err, n_mod, n_new, n_skip = test_obj.set_param_dic(param)
+            print('%s - Error : %d, Del : %d, Modify : %d, New : %d, Skip : %d' % (
+                nm, n_err, n_del, n_mod, n_new, n_skip))
+            test_obj.set_defult_pen()
+            test_obj.close()
+convert.xml2gsm_batch(convert_temp_dir, convert_new_dir, version)
