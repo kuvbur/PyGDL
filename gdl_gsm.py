@@ -7,7 +7,8 @@ import csv
 
 curr_dir = os.path.dirname(os.path.abspath(__file__))
 convert_data_dir = os.path.abspath(os.path.join(curr_dir, 'MODYFY_DATA'))
-DataBase_mainguid_fname = os.path.join(convert_data_dir, 'DataBase_mainguid.csv')
+DataBase_mainguid_fname = os.path.join(
+    convert_data_dir, 'DataBase_mainguid.csv')
 
 
 def indent(elem, level=0):
@@ -89,7 +90,7 @@ class gdl_gsm(object):
             fname_template = fname_xml
         self.defult_value = {'Length': '0', 'Boolean': '0', 'String': '', 'Angle': '0', 'Title': '', 'Integer': '0',
                              'LineType': '1', 'PenColor': '1', 'FillPattern': '1', 'Material': '1', 'RealNum': '0',
-                             'Profile': '0', 'BuildingMaterial': '0', 'Dictionary':None}
+                             'Profile': '0', 'BuildingMaterial': '0', 'Dictionary': None}
         self.valid_type_param = list(self.defult_value.keys())
         self.mode_dic = {'gen': 'Script_1D', '3d': 'Script_3D', '2d': 'Script_2D',
                          'spec': 'Script_PR', 'ui': 'Script_UI', 'prm': 'Script_VL',
@@ -195,7 +196,8 @@ class gdl_gsm(object):
         Запись файла xml с последубщим конвертированием его в gsm
         """
         etree.indent(self.root, space="\t")
-        txt = etree.tostring(self.root, encoding='UTF-8', xml_declaration=True).decode()
+        txt = etree.tostring(self.root, encoding='UTF-8',
+                             xml_declaration=True).decode()
         txt = txt.replace('[""', '["')
         txt = txt.replace('""]', '"]')
         txt = txt.replace('["]', '[""]')
@@ -296,7 +298,8 @@ class gdl_gsm(object):
         except KeyError:
             param_type_exist = None
         if param_type is not None and param_type != param_type_exist and param_type_exist is not None:
-            print('Diff type', param_type_exist, param_type, param_name, self.fname_xml)
+            print('Diff type', param_type_exist,
+                  param_type, param_name, self.fname_xml)
             return 0
         if not (param_type in self.valid_type_param):
             print('Type error', param_type_exist, param_type, param_name)
@@ -312,41 +315,57 @@ class gdl_gsm(object):
             new_param_description = etree.SubElement(new_param, "Description")
             if param_Child is True or param_Hidden is True or param_BoldName is True or param_Unique is True or param_Fix is True:
                 new_param_flag = etree.SubElement(new_param, "Flags")
-            if param_Child: etree.SubElement(new_param_flag, "ParFlg_Child")
-            if param_Hidden: etree.SubElement(new_param_flag, "ParFlg_Hidden")
+            if param_Child:
+                etree.SubElement(new_param_flag, "ParFlg_Child")
+            if param_Hidden:
+                etree.SubElement(new_param_flag, "ParFlg_Hidden")
             if param_type != 'Title':
-                if param_BoldName: etree.SubElement(new_param_flag, "ParFlg_BoldName")
-                if param_Unique: etree.SubElement(new_param_flag, "ParFlg_Unique")
+                if param_BoldName:
+                    etree.SubElement(new_param_flag, "ParFlg_BoldName")
+                if param_Unique:
+                    etree.SubElement(new_param_flag, "ParFlg_Unique")
                 if type(param_value) == list:
-                    f_dimension = len(param_value) - 1
-                    s_dimension = 1
+                    f_dimension = len(param_value)
+                    s_dimension = 0
                     if type(param_value[0]) == list:
-                        s_dimension = len(param_value[0]) - 1
-                    array_value = etree.SubElement(new_param, "ArrayValues", FirstDimension=str(f_dimension - 1),
-                                                   SecondDimension=str(s_dimension - 1))
-                    for i in range(1, f_dimension):
+                        s_dimension = len(param_value[0])
+                    array_value = etree.SubElement(new_param, "ArrayValues", FirstDimension=str(f_dimension),
+                                                   SecondDimension=str(s_dimension))
+                    for i in range(0, f_dimension):
                         if s_dimension > 1:
-                            for j in range(1, s_dimension):
+                            for j in range(0, s_dimension):
                                 pval = param_value[i][j]
-                                if param_type == 'String': pval = etree.CDATA('"' + str(pval) + '"')
-                                el = etree.SubElement(array_value, "AVal", Row=str(i), Column=str(j))
+                                if param_type == 'String':
+                                    pval = etree.CDATA(
+                                        '"' + str(pval) + '"')
+                                el = etree.SubElement(
+                                    array_value, "AVal", Row=str(i+1), Column=str(j+1))
                                 el.text = pval
                         else:
                             pval = param_value[i]
-                            if param_type == 'String': pval = etree.CDATA('"' + str(pval) + '"')
-                            el = etree.SubElement(array_value, "AVal", Row=str(i))
+                            if param_type == 'String':
+                                pval = etree.CDATA('"' + str(pval) + '"')
+                            el = etree.SubElement(
+                                array_value, "AVal", Row=str(i+1))
                             el.text = pval
                 else:
-                    if param_value is None or param_value == '' or param_type != param_type_exist: param_value = \
-                        self.defult_value[param_type]
-                    if param_type == 'String': param_value = etree.CDATA('"' + str(param_value) + '"')
+                    if param_value is None or param_value == '' or (param_type != param_type_exist and param_type_exist is not None):
+                        param_value = \
+                            self.defult_value[param_type]
+                    if param_type == 'String':
+                        param_value = etree.CDATA('"' + str(param_value) + '"')
                     new_param_value = etree.SubElement(new_param, "Value")
                     new_param_value.text = param_value
-            new_param_description.text = etree.CDATA('"' + param_description + '"')
+            if type(param_description) == str:
+                new_param_description.text = etree.CDATA(
+                    '"' + param_description + '"')
+            else:
+                new_param_description.text = etree.CDATA(
+                    '""')
             return 2
         else:
             modify_flag = 0
-            if param_description is not None and param_node.find('Description').text !=param_description:
+            if param_description is not None and param_node.find('Description').text != param_description:
                 modify_flag = modify_flag + 1
                 param_node.find('Description').text = etree.CDATA(
                     '"' + param_description + '"')
@@ -356,12 +375,13 @@ class gdl_gsm(object):
                     s_dimension = 1
                     if type(param_value[0]) == list:
                         s_dimension = len(param_value[0]) - 1
-                ##TODO Добавить перезапись массивов
+                # TODO Добавить перезапись массивов
                 else:
                     if param_node.find('Value').text != param_value:
                         modify_flag = modify_flag + 1
                         if param_type == 'String':
-                            param_value = etree.CDATA('"' + str(param_value) + '"')
+                            param_value = etree.CDATA(
+                                '"' + str(param_value) + '"')
                         param_node.find('Value').text = param_value
             self._set_flag(param_name, 'Fix', param_Fix)
             if param_type != 'Title':
@@ -395,7 +415,8 @@ class gdl_gsm(object):
                 param_flag = etree.SubElement(param_node, "Flags")
             else:
                 param_flag = param_node.find("Flags")
-            if key_flag == 'Fix': param_flag = param_node
+            if key_flag == 'Fix':
+                param_flag = param_node
             if value is True and self.parameters[param_name][key_flag] is False:
                 etree.SubElement(param_flag, key_flag)
             if value is False and self.parameters[param_name][key_flag] is True:
@@ -425,22 +446,23 @@ class gdl_gsm(object):
                 else:
                     param_list[param_name] = {}
                 if child.find('Description') is not None:
-                    param_list[param_name]['Description'] = child.find('Description').text
+                    param_list[param_name]['Description'] = child.find(
+                        'Description').text
                 array_child = child.find('ArrayValues')
                 if array_child is not None:
                     f_dimension = int(array_child.get('FirstDimension'))
                     s_dimension = int(array_child.get('SecondDimension'))
                     if s_dimension > 0:
-                        row = [None for i in range(s_dimension + 2)]
-                        value = [row for i in range(f_dimension + 2)]
+                        row = [None for i in range(0, s_dimension)]
+                        value = [row for i in range(0, f_dimension)]
                     else:
-                        value = [None for i in range(f_dimension + 2)]
+                        value = [None for i in range(0, f_dimension)]
                     for c in array_child.findall('AVal'):
                         val = c.text
-                        r = int(c.get('Row'))
+                        r = int(c.get('Row'))-1
                         c = c.get('Column')
                         if c is not None:
-                            c = int(c)
+                            c = int(c)-1
                             value[r][c] = val
                         else:
                             try:
@@ -451,14 +473,19 @@ class gdl_gsm(object):
                     param_list[param_name]['Value'] = value
                 else:
                     if child.find('Value') is not None:
-                        param_list[param_name]['Value'] = child.find('Value').text
+                        param_list[param_name]['Value'] = child.find(
+                            'Value').text
                 ParFlg = child.find("Flags")
                 param_list[param_name]['Fix'] = (child.find("Fix") is not None)
                 if ParFlg is not None:
-                    param_list[param_name]['ParFlg_Child'] = (ParFlg.find("ParFlg_Child") is not None)
-                    param_list[param_name]['ParFlg_Hidden'] = (ParFlg.find("ParFlg_Hidden") is not None)
-                    param_list[param_name]['ParFlg_BoldName'] = (ParFlg.find("ParFlg_BoldName") is not None)
-                    param_list[param_name]['ParFlg_Unique'] = (ParFlg.find("ParFlg_Unique") is not None)
+                    param_list[param_name]['ParFlg_Child'] = (
+                        ParFlg.find("ParFlg_Child") is not None)
+                    param_list[param_name]['ParFlg_Hidden'] = (
+                        ParFlg.find("ParFlg_Hidden") is not None)
+                    param_list[param_name]['ParFlg_BoldName'] = (
+                        ParFlg.find("ParFlg_BoldName") is not None)
+                    param_list[param_name]['ParFlg_Unique'] = (
+                        ParFlg.find("ParFlg_Unique") is not None)
                     param_list[param_name]['Flags'] = True
                 try:
                     param_list[title]['List'].append(param_name)
@@ -484,7 +511,7 @@ class gdl_gsm(object):
         return n_del
 
     def set_param_dic(self, param_dic):
-        rezult = [0,0,0,0]
+        rezult = [0, 0, 0, 0]
         for param_name, val in param_dic.items():
             param_type = val.setdefault('Type')
             if param_type in self.valid_type_param:
@@ -496,7 +523,7 @@ class gdl_gsm(object):
                 param_Unique = val.setdefault('ParFlg_Unique')
                 param_Fix = None
                 rez = self.set_param(param_name, param_type, param_description, param_value, param_Child, param_Hidden,
-                               param_BoldName, param_Unique, param_Fix)
+                                     param_BoldName, param_Unique, param_Fix)
                 rezult[rez] = rezult[rez] + 1
         n_err, n_mod, n_new, n_skip = rezult
         return n_err, n_mod, n_new, n_skip
@@ -598,7 +625,8 @@ class gdl_gsm(object):
         self.d3d(self._addc_(code, comment))
 
     def hotline(self, x1, y1, z1, x2, y2, z2, comment=''):
-        code = 'HOTLINE %f, %f, %f, %f, %f, %f, unID : unID=unID+1' % (x1, y1, z1, x2, y2, z2)
+        code = 'HOTLINE %f, %f, %f, %f, %f, %f, unID : unID=unID+1' % (
+            x1, y1, z1, x2, y2, z2)
         self.d3d(self._addc_(code, comment))
 
     def hotline2(self, x1, y1, x2, y2, comment=''):
@@ -606,11 +634,13 @@ class gdl_gsm(object):
         self.d2d(self._addc_(code, comment))
 
     def hotspot(self, x, y, z, paramReference, flags, displayParam, comment=''):
-        code = 'HOTSPOT %f, %f, %f, unID , %s, %i, %s : unID=unID+1' % (x, y, z, paramReference, flags, displayParam)
+        code = 'HOTSPOT %f, %f, %f, unID , %s, %i, %s : unID=unID+1' % (
+            x, y, z, paramReference, flags, displayParam)
         self.d3d(self._addc_(code, comment))
 
     def hotspot2(self, x, y, paramReference, flags, displayParam, comment=''):
-        code = 'HOTSPOT2 %f, %f, unID, %s, %i, %s : unID=unID+1' % (x, y, paramReference, flags, displayParam)
+        code = 'HOTSPOT2 %f, %f, unID, %s, %i, %s : unID=unID+1' % (
+            x, y, paramReference, flags, displayParam)
         self.d2d(self._addc_(code, comment))
 
     def lin_(self, x1, y1, z1, x2, y2, z2, comment=''):
@@ -674,7 +704,8 @@ class gdl_gsm(object):
         self.d2d(self._addc_(code, comment))
 
     def define_style(self, name, font_family, size, anchor, face_code, comment=''):
-        code = 'DEFINE STYLE "%s" %s, %s, %s, %s' % (name, font_family, size, anchor, face_code)
+        code = 'DEFINE STYLE "%s" %s, %s, %s, %s' % (
+            name, font_family, size, anchor, face_code)
         self.gen(self._addc_(code, comment))
 
     def set_style(self, name, comment=''):
@@ -692,8 +723,10 @@ class gdl_gsm(object):
 
 if __name__ == "__main__":
     convert_old_dir = os.path.abspath(os.path.join(curr_dir, 'CONVERT', 'gsm'))
-    convert_new_dir = os.path.abspath(os.path.join(curr_dir, 'CONVERT', 'gsm_out'))
-    convert_temp_dir = os.path.abspath(os.path.join(curr_dir, 'CONVERT', 'xml'))
+    convert_new_dir = os.path.abspath(
+        os.path.join(curr_dir, 'CONVERT', 'gsm_out'))
+    convert_temp_dir = os.path.abspath(
+        os.path.join(curr_dir, 'CONVERT', 'xml'))
     base = database_guid(DataBase_mainguid_fname)
     for root, dirs, files in os.walk(convert_temp_dir):
         for nm in files:
