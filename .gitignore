@@ -147,3 +147,6 @@ MODYFY_DATA/*
 *.RPT
 *.dbe
 .pylint.d/*
+*.zip
+/Tool/LP_XMLConverter25
+settings.py

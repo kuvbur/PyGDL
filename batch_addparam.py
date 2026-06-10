@@ -20,19 +20,19 @@ def set_path(path):
 # =============================================================================
 # Имена файлов с параметрами
 # =============================================================================
-add_file = ['Металлическая Дверь']
+add_file = ['Рамка ЭЛ в стене']
 dump_file = 'paramdump'
 force_conv = True  # Нужно ли конвертировать gsm в xml или брать сразу из папки xml_conv
 version = 25
-# sourse_param = "Dump"
-sourse_param = "GSMFile"
+sourse_param = "Dump"
+# sourse_param = "GSMFile"
 del_param = False
 # =============================================================================
 # Располагаем исходные файлы в папке 'gsm'
 # Промежуточные файлы будут сохранены в папку 'xml'
 # Откуда конвертер переводит их формат gsm и копирует в папку 'gdlnew'
 
-curr_dir = "C:\\Users\\kuvbur\\Google Диск\\Share\\pygdl\\CONVERT"
+curr_dir = "D:\\Рогожин ДА\\prog\\YandexDisk\\Работа\\PyGDL\\CONVERT"
 os.chdir(curr_dir)
 convert_old_dir = set_path(os.path.join(curr_dir, 'gsm'))
 convert_temp_dir = set_path(os.path.join(curr_dir, 'xml'))

@@ -525,6 +525,8 @@ class gdl_gsm(object):
                 rez = self.set_param(param_name, param_type, param_description, param_value, param_Child, param_Hidden,
                                      param_BoldName, param_Unique, param_Fix)
                 rezult[rez] = rezult[rez] + 1
+            else:
+                print('Error type param :' + param_type)
         n_err, n_mod, n_new, n_skip = rezult
         return n_err, n_mod, n_new, n_skip
 

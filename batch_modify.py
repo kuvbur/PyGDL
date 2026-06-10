@@ -79,6 +79,10 @@ def get_paramdump(add_param_file):
     start_array = False
     with open(add_param_file, "r") as f:
         for line in f:
+            isFix = False
+            if '(fix)' in line:
+                isFix = True
+                line = line.replace('(fix)', '')
             if '0x' in line or '[' in line:
                 params = line.strip('\t').strip('\n').strip().split('\t')
                 if start_array and '0x' in line:
@@ -97,7 +101,7 @@ def get_paramdump(add_param_file):
 
                 if 'dim [' in line:
                     name = params[0].split(' ')[0].strip()
-                    type_param = params[0].split('(')[1].strip(')')
+                    type_param = params[0].split('(')[1].strip(')').replace(' ', '')
                     array = params[1].split(']')
                     nrow = int(array[0].strip('dim ['))
                     value = []
@@ -130,10 +134,10 @@ def get_paramdump(add_param_file):
 
                 if not start_array and '0x' in line:
                     name = params[0].split(' ')[0].strip()
-                    type_param = params[0].split('(')[1].strip(')')
+                    type_param = params[0].split('(')[1].strip(')').replace(' ', '')
                     value = params[2].strip('"').strip("'")
                     description = ''
-                    if type_param != 'String':
+                    if len(params)>5:
                         description = params[5].strip('"').strip("'")
                     parametrs[name] = {}
                     parametrs[name]['Type'] = type_param

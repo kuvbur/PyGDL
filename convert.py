@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 import os
+import pathlib
+from download_and_unzip import DownloadAndUnzip
 import sys
 from subprocess import Popen, PIPE, STDOUT, CalledProcessError
 import shlex
 import logging
+import json
 
-curr_dir = os.path.dirname(os.path.abspath(__file__))
-convert_dir = os.path.abspath(os.path.join(curr_dir, 'CONVERT'))
+curr_dir = pathlib.Path(__file__).parent.absolute()
+convert_dir = curr_dir / 'CONVERT'
 dict_version = {19: "35", 20: "36", 21: "37", 22: "38", 24: "41", 25: "43"}
 inv_dict_version = {v: k for k, v in dict_version.items()}
 
@@ -21,6 +24,25 @@ ignore_msg = ['error: Missing ancestor with main GUID',
               'Update ... ',
               'warning: Macro may be unused',
               'error: Missing macro']
+
+def DownloadLP_XMLConverters(version):
+    devKitFolder = curr_dir / 'Tool'
+    devKitFolderVersion = devKitFolder / f'LP_XMLConverter{version}'
+    if not devKitFolder.exists():
+        devKitFolder.mkdir(parents=True)
+    if not devKitFolderVersion.exists():
+        logging.info(f"Download LP_XMLConverter {version}")
+        configPath = devKitFolder / 'config.json'
+        configFile = open(configPath, encoding="utf-8")
+        configData = json.load(configFile)
+        configFile.close()
+        DownloadAndUnzip(configData['LP_XMLConverter'][str(version)], devKitFolder)
+        if not devKitFolderVersion.exists():
+            logging.error(f"ERROR, folder for LP_XMLConverter {version} not exists")
+            return ""
+    if devKitFolderVersion.exists() and devKitFolder.exists():
+        logging.info(f"LP_XMLConverter {version} exist")
+        return devKitFolderVersion
 
 def run_shell_command(command_line):
     command_line_args = shlex.split(command_line)
@@ -53,11 +75,9 @@ def run_shell_command(command_line):
         logging.info('Subprocess finished')
     return True
 
-
 def getconverter(version):
-    path_LP_XMLConverter = os.path.abspath(
-        os.path.join(curr_dir, 'LP_XMLConverter' + str(version), 'LP_XMLConverter.exe'))
-    path_LP_XMLConverter = '"' + path_LP_XMLConverter + '"'
+    path_LP_XMLConverter = DownloadLP_XMLConverters(version)
+    path_LP_XMLConverter = '"' + str(path_LP_XMLConverter) + '\\WIN\\LP_XMLConverter.EXE"'
     return path_LP_XMLConverter
 
 
@@ -68,7 +88,7 @@ def xml2gsm_batch(fpath_xml, fpath_gsm, version):
     fpath_xml = '"' + str(fpath_xml) + '"'
     fpath_gsm = '"' + str(fpath_gsm) + '"'
     path_LP_XMLConverter = getconverter(version)
-    cmd_body = '%s makelibrary -l UTF8 -reportlevel 2 -checkparams' % path_LP_XMLConverter
+    cmd_body = '%s makelibrary -l CYR -reportlevel 2 -checkparams' % path_LP_XMLConverter
     cmd = '%s %s %s' % (cmd_body, fpath_xml, fpath_gsm)
     rezult = run_shell_command(cmd)
     return rezult
@@ -81,7 +101,7 @@ def gsm2xml(fname_xml, fname_gsm, version):
     fname_gsm = '"' + str(fname_gsm) + '"'
     fname_xml = '"' + str(fname_xml) + '"'
     path_LP_XMLConverter = getconverter(version)
-    cmd = '%s libpart2xml -l UTF8 %s %s' % (path_LP_XMLConverter, fname_gsm, fname_xml)
+    cmd = '%s libpart2xml -l CYR %s %s' % (path_LP_XMLConverter, fname_gsm, fname_xml)
     rezult = run_shell_command(cmd)
     return rezult
 
@@ -105,7 +125,7 @@ def xml2gsm(fname_xml, fname_gsm, version):
     fname_gsm = '"' + fname_gsm + '"'
     fname_xml = '"' + fname_xml + '"'
     path_LP_XMLConverter = getconverter(version)
-    cmd = '%s xml2libpart -l UTF8 %s %s' % (path_LP_XMLConverter, fname_xml, fname_gsm)
+    cmd = '%s xml2libpart -l CYR %s %s' % (path_LP_XMLConverter, fname_xml, fname_gsm)
     rezult = run_shell_command(cmd)
     return rezult
 
@@ -161,14 +181,13 @@ def get_version_gsm(fname_gsm):
     return version, rezult
 
 
-# if __name__ == "__main__":
-#     os.chdir(curr_dir)
-#     version_gsm, rezult = get_version_gsm(get_fname_gsm("Перемычки .gsm"))
-#     print(version_gsm, rezult)
-# #    fname_gsm_to = convert_gsm(19, "test_19")
-#
-#
-# #    if len(fname_gsm_to):
-# #        version_gsm, rezult = get_version_gsm(fname_gsm_to)
-# #        print(version_gsm, rezult)
-# #    finalizexml(os.path.abspath(os.path.join(curr_dir,'CONVERT','xml')),os.path.abspath(os.path.join(curr_dir,'CONVERT','gsm_out')),19, reportlevel=1, verbosityLevel=2)
+if __name__ == "__main__":
+    version = 25
+    print(DownloadLP_XMLConverters(version))
+#    fname_gsm_to = convert_gsm(19, "test_19")
+
+
+#    if len(fname_gsm_to):
+#        version_gsm, rezult = get_version_gsm(fname_gsm_to)
+#        print(version_gsm, rezult)
+#    finalizexml(os.path.abspath(os.path.join(curr_dir,'CONVERT','xml')),os.path.abspath(os.path.join(curr_dir,'CONVERT','gsm_out')),19, reportlevel=1, verbosityLevel=2)
